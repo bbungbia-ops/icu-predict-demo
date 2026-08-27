@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cổng quản trị license key ICU Predict">
+    <title>{% block title %}License Admin · ICU Predict{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/license_admin.css') }}">
+</head>
+<body>
+{% if session.get('admin_id') %}
+<div class="shell">
+    <aside class="sidebar">
+        <a class="brand" href="{{ url_for('license_portal.dashboard') }}">
+            <span class="brand-mark">⌁</span>
+            <span><strong>ICU Predict</strong><small>License Admin</small></span>
+        </a>
+        <nav>
+            <a href="{{ url_for('license_portal.dashboard') }}" class="{{ 'active' if request.endpoint == 'license_portal.dashboard' else '' }}">Tổng quan</a>
+            <a href="{{ url_for('license_portal.order_list') }}" class="{{ 'active' if request.endpoint in ('license_portal.order_list', 'license_portal.order_detail') else '' }}">Đơn hàng</a>
+            <a href="{{ url_for('license_portal.order_create') }}" class="{{ 'active' if request.endpoint == 'license_portal.order_create' else '' }}">Tạo license mới</a>
+            <a href="{{ url_for('license_portal.license_list') }}" class="{{ 'active' if request.endpoint == 'license_portal.license_list' else '' }}">License keys</a>
+        </nav>
+        <div class="sidebar-foot">
+            <span>Đăng nhập: {{ session.get('admin_username') }}</span>
+            <form method="post" action="{{ url_for('license_portal.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="link-button">Đăng xuất</button>
+            </form>
+        </div>
+    </aside>
+    <main class="content">
+{% else %}
+<main class="login-main">
+{% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack">
+            {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+{% if session.get('admin_id') %}
+    </main>
+</div>
+{% else %}
+</main>
+{% endif %}
+</body>
+</html>

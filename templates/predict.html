@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Tạo bản ghi đánh giá - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">TIẾP NHẬN BẢN GHI NGHIÊN CỨU</div>
+        <h1>Tạo bản ghi đánh giá</h1>
+        <div class="breadcrumb">Nhập thông số có kiểm tra dữ liệu trước khi đưa vào hàng đợi bác sĩ đánh giá.</div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>Chỉ dùng cho nghiên cứu/demo</strong><span>Hệ thống không đưa khuyến nghị điều trị và không tạo chẩn đoán.</span></div></div>
+    <form method="POST" action="{{ url_for('predictions.predict') }}" id="predict-form">
+        <div class="intake-layout">
+            <section class="card intake-main">
+                <div class="card-header"><div><div class="eyebrow">01 · NGỮ CẢNH BỆNH NHÂN</div><h3>Ngữ cảnh bệnh nhân</h3></div></div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="patient_id">Bệnh nhân</label>
+                        <select id="patient_id" name="patient_id" class="form-control"><option value="">-- Bản ghi chưa gắn bệnh nhân --</option>{% for p in patients %}<option value="{{ p.id }}" {% if request.args.get('patient_id')|int == p.id %}selected{% endif %}>{{ p.patient_code }} — {{ p.name }}</option>{% endfor %}</select>
+                        <div class="indicator-hint">Chỉ người được phân quyền mới được tạo bản ghi gắn danh tính bệnh nhân.</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Ghi chú bối cảnh</label>
+                        <textarea id="notes" name="notes" class="form-control" placeholder="Nguồn số liệu, thời điểm lấy mẫu, thông tin cần lưu ý..."></textarea>
+                    </div>
+                </div>
+            </section>
+            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul></div></aside>
+        </div>
+
+        <section class="card clinical-form-card">
+            <div class="card-header"><div><div class="eyebrow">02 · DỮ LIỆU ĐẦU VÀO NGHIÊN CỨU</div><h3>Thông số lâm sàng</h3></div><span class="data-state neutral">Có kiểm tra giới hạn nhập</span></div>
+            <div class="card-body"><div class="predict-form-grid">
+                <div class="form-group"><label for="map_value">MAP <span>(mmHg)</span></label><input type="number" id="map_value" name="map_value" class="form-control" step="any" min="0" max="250" placeholder="Ví dụ: 70" required><div class="indicator-hint">Một trong sáu đầu vào mô hình nghiên cứu.</div></div>
+                <div class="form-group"><label for="pao2_fio2">PaO2/FiO2</label><input type="number" id="pao2_fio2" name="pao2_fio2" class="form-control" step="any" min="0" max="800" placeholder="Ví dụ: 200" required><div class="indicator-hint">Đối chiếu FiO2 và hỗ trợ hô hấp khi diễn giải.</div></div>
+                <div class="form-group"><label for="bilirubin">Bilirubin <span>(mg/dL)</span></label><input type="number" id="bilirubin" name="bilirubin" class="form-control" step="any" min="0" max="60" placeholder="Ví dụ: 1.2" required></div>
+                <div class="form-group"><label for="creatinine">Creatinine <span>(mg/dL)</span></label><input type="number" id="creatinine" name="creatinine" class="form-control" step="any" min="0" max="30" placeholder="Ví dụ: 1.0" required></div>
+                <div class="form-group"><label for="platelet">Tiểu cầu <span>(x10^9/L)</span></label><input type="number" id="platelet" name="platelet" class="form-control" step="any" min="0" max="2000" placeholder="Ví dụ: 200" required></div>
+                <div class="form-group"><label for="gcs">GCS <span>(3–15)</span></label><input type="number" id="gcs" name="gcs" class="form-control" step="any" min="3" max="15" placeholder="Ví dụ: 15" required><div class="indicator-hint">Ghi chú nếu không thể đánh giá đầy đủ do an thần/đặt nội khí quản.</div></div>
+                <div class="form-group full-width sofa-context"><label for="sofa">SOFA tổng <span>(0–24, chỉ dùng làm ngữ cảnh)</span></label><input type="number" id="sofa" name="sofa" class="form-control" step="any" min="0" max="24" placeholder="Ví dụ: 4" required><div class="indicator-hint">Không được đưa vào mô hình để tránh trùng lặp với các thành phần suy cơ quan.</div></div>
+            </div></div>
+        </section>
+        <div class="intake-actions"><button type="submit" class="btn btn-primary btn-lg" id="btn-predict">Tạo bản ghi để bác sĩ đánh giá</button><a href="{{ url_for('dashboard.index') }}" class="btn btn-outline btn-lg">Hủy</a></div>
+    </form>
+</div>
+{% endblock %}

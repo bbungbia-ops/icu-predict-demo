@@ -1,0 +1,8 @@
+flask>=3.0
+numpy
+scikit-learn
+joblib
+fpdf2
+werkzeug>=3.0
+gunicorn>=22.0
+psycopg[binary]>=3.2

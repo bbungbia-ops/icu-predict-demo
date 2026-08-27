@@ -1,0 +1,26 @@
+{% extends 'license_admin/layout.html' %}
+{% block title %}Tổng quan · License Admin{% endblock %}
+{% block content %}
+<header class="page-header">
+    <div><div class="eyebrow">QUẢN TRỊ THƯƠNG MẠI</div><h1>License Key ICU Predict</h1><p>Tạo key theo gói, đối soát thanh toán và quản lý thời hạn sử dụng.</p></div>
+    <a class="button primary" href="{{ url_for('license_portal.order_create') }}">Tạo license mới</a>
+</header>
+<section class="metrics">
+    <article><span>License hoạt động</span><strong>{{ summary.active }}</strong><small>Đang được phép sử dụng</small></article>
+    <article><span>Đơn chờ thanh toán</span><strong>{{ summary.pending }}</strong><small>Chưa kích hoạt key</small></article>
+    <article><span>License hết hạn</span><strong>{{ summary.expired }}</strong><small>Đã tự cập nhật theo ngày</small></article>
+    <article><span>Doanh thu đã ghi nhận</span><strong>{{ format_vnd(summary.paid_total) }}</strong><small>Chỉ các giao dịch đã xác nhận</small></article>
+</section>
+<section class="card">
+    <div class="section-heading"><div><div class="eyebrow">ĐƠN HÀNG GẦN ĐÂY</div><h2>Theo dõi trạng thái thanh toán</h2></div><a href="{{ url_for('license_portal.order_list') }}">Xem tất cả</a></div>
+    <div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Tổ chức</th><th>Gói</th><th>Giá trị</th><th>Thanh toán</th><th>License</th><th></th></tr></thead>
+    <tbody>{% for order in recent_orders %}<tr>
+        <td><strong>{{ order.order_code }}</strong><small>{{ order.created_at }}</small></td>
+        <td>{{ order.organization_name }}</td><td>{{ plan_name(order.plan_code) }}</td><td>{{ format_vnd(order.amount_vnd) }}</td>
+        <td><span class="badge {{ order.payment_status }}">{{ order_status_label(order.payment_status) }}</span></td>
+        <td><span class="badge {{ order.license_status }}">{{ license_status_label(order.license_status) }}</span></td>
+        <td><a href="{{ url_for('license_portal.order_detail', order_id=order.id) }}">Chi tiết</a></td>
+    </tr>{% else %}<tr><td colspan="7" class="empty">Chưa có đơn hàng nào.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+<section class="notice"><strong>Luồng tự động:</strong> webhook chỉ kích hoạt key khi chữ ký hợp lệ, nội dung chuyển khoản khớp và số tiền đúng với đơn hàng. Chuyển khoản sai được lưu để đối soát, không tự mở license.</section>
+{% endblock %}

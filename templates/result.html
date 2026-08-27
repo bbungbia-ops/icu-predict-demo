@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Bản ghi đánh giá - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">BẢN GHI ĐÁNH GIÁ NGHIÊN CỨU</div>
+        <h1>Bản ghi đánh giá #{{ prediction.id }}</h1>
+        <div class="breadcrumb">{% if prediction.patient_name %}{{ prediction.patient_code }} · {{ prediction.patient_name }}{% else %}Chưa gắn bệnh nhân{% endif %} · tạo lúc {{ prediction.predicted_at }}</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('reports.generate_report', prediction_id=prediction.id) }}" class="btn btn-outline" id="btn-download-pdf">Tải tóm tắt</a>
+        <a href="{{ url_for('predictions.predict_form') }}" class="btn btn-primary" id="btn-new-predict">Tạo bản ghi mới</a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="research-banner" role="note">
+        <div class="research-banner-icon">i</div>
+        <div><strong>Không dùng cho quyết định điều trị</strong><span>{{ analysis.warnings[1] }}</span></div>
+    </div>
+
+    <div class="assessment-layout">
+        <section class="card assessment-summary">
+            <div class="card-body">
+                <div class="eyebrow">TRẠNG THÁI QUY TRÌNH</div>
+                {% if prediction.acknowledged_at %}
+                <div class="status-hero complete"><span class="status-dot"></span>Đã có bác sĩ đánh giá</div>
+                <p>Được xác nhận bởi {{ prediction.reviewer_name or 'người dùng hệ thống' }} lúc {{ prediction.acknowledged_at }}.</p>
+                {% else %}
+                <div class="status-hero pending"><span class="status-dot"></span>Cần bác sĩ đánh giá</div>
+                <p>Đây là tín hiệu điều phối. Bác sĩ cần đối chiếu toàn bộ hồ sơ trước khi có quyết định chuyên môn.</p>
+                {% endif %}
+                <div class="assessment-facts">
+                    <div><span>Tín hiệu mô hình</span><strong>{{ analysis.signal.label }}</strong><small>{{ analysis.signal.description }}</small></div>
+                    <div><span>Phiên bản</span><strong>{{ analysis.model_version }}</strong><small>Có thể truy xuất nguồn gốc</small></div>
+                    <div><span>Phạm vi dữ liệu</span><strong>{{ 'Cần xem lại' if analysis.out_of_distribution else 'Trong phạm vi demo' }}</strong><small>{{ 'Có giá trị ngoài dữ liệu huấn luyện' if analysis.out_of_distribution else 'Không chứng minh hiệu năng lâm sàng' }}</small></div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="card model-note-card">
+            <div class="card-body">
+                <div class="eyebrow">GIỚI HẠN MÔ HÌNH</div>
+                <h3>Điều hệ thống không làm</h3>
+                <ul class="guardrail-list"><li>Không chẩn đoán hoặc kê đơn.</li><li>Không khẳng định xác suất biến cố.</li><li>Không thay thế đánh giá lâm sàng.</li></ul>
+                {% if analysis.out_of_distribution %}<div class="inline-alert">Có dữ liệu nằm ngoài phạm vi từng huấn luyện. Không diễn giải định lượng kết quả.</div>{% endif %}
+            </div>
+        </aside>
+    </div>
+
+    {% if not prediction.acknowledged_at %}
+    <section class="card acknowledgement-card">
+        <div class="card-header"><div><div class="eyebrow">XÁC NHẬN CỦA BÁC SĨ</div><h3>Xác nhận đã đánh giá</h3></div><span class="required-label">Bắt buộc ghi chú</span></div>
+        <form method="POST" action="{{ url_for('predictions.acknowledge', prediction_id=prediction.id) }}" class="acknowledgement-form">
+            <textarea name="acknowledgement_note" class="form-control" maxlength="2000" required placeholder="Ghi nhận đánh giá của bác sĩ, bối cảnh lâm sàng hoặc hướng xử trí theo quy trình bệnh viện..."></textarea>
+            <button type="submit" class="btn btn-primary">Lưu xác nhận đánh giá</button>
+        </form>
+    </section>
+    {% else %}
+    <section class="card acknowledgement-card complete-record">
+        <div class="card-header"><div><div class="eyebrow">NHẬT KÝ KIỂM TOÁN</div><h3>Nhận định đã lưu</h3></div><span class="data-state ready">Đã hoàn tất</span></div>
+        <div class="acknowledgement-note">{{ prediction.acknowledgement_note }}</div>
+    </section>
+    {% endif %}
+
+    <section class="card">
+        <div class="card-header"><div><div class="eyebrow">RÀ SOÁT DỮ LIỆU ĐẦU VÀO</div><h3>Thông số tại thời điểm tạo bản ghi</h3></div><span class="data-state neutral">Nhập lúc {{ prediction.predicted_at }}</span></div>
+        <div class="card-body"><div class="clinical-input-grid">
+            {% for feature in analysis.feature_analysis %}
+            <div class="clinical-input-card {{ feature.status }}">
+                <div class="feature-label">{{ feature.label }}</div>
+                <div class="feature-value">{{ feature.value }} <small>{{ feature.unit }}</small></div>
+                <div class="feature-status {{ feature.status }}">{{ feature.status_text }}</div>
+                {% if feature.key == 'sofa' %}
+                <div class="feature-range">Thang điểm tổng: 0 – 24</div>
+                <div class="context-tag">Ngữ cảnh, không dùng làm đầu vào AI</div>
+                {% else %}
+                <div class="feature-range">Ngưỡng hiển thị: {{ feature.normal_min }} – {{ feature.normal_max }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div></div>
+    </section>
+</div>
+{% endblock %}

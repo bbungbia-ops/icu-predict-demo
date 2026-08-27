@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Giới thiệu - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">GIỚI THIỆU NỀN TẢNG</div>
+        <h1>ICU Predict</h1>
+        <div class="breadcrumb">Nền tảng hỗ trợ quy trình đánh giá lâm sàng trong môi trường ICU.</div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="research-banner"><div class="research-banner-icon">i</div><div><strong>Phiên bản nghiên cứu/demo</strong><span>Hệ thống giúp tổ chức thông tin và lưu dấu vết đánh giá; không thay thế bác sĩ, chẩn đoán hoặc y lệnh.</span></div></div>
+    <div class="card mb-3"><div class="card-body" style="text-align:center; padding:42px 32px;"><div class="brand-icon" style="width:72px; height:72px; margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><h2 style="font-size:1.65rem; margin-bottom:10px;">Biến dữ liệu rời rạc thành một quy trình có trách nhiệm</h2><p style="max-width:720px; margin:0 auto; color:var(--gray-500); line-height:1.6;">ICU Predict tạo bản ghi nghiên cứu từ các thông số lâm sàng, giúp đội ngũ ưu tiên việc rà soát và lưu nhận định của bác sĩ trong nhật ký kiểm toán.</p></div></div>
+
+    <div class="workflow-panel mb-3"><div><span class="workflow-step">01</span><strong>Ghi nhận thông số</strong><p>Sáu thông số thô được nhập cùng với SOFA làm ngữ cảnh.</p></div><div><span class="workflow-step">02</span><strong>Kiểm tra dữ liệu</strong><p>Hệ thống kiểm tra giới hạn nhập và gắn cờ dữ liệu ngoài phạm vi demo.</p></div><div><span class="workflow-step">03</span><strong>Bác sĩ xác nhận</strong><p>Bản ghi đi vào hàng đợi và được lưu nhận định sau khi đánh giá.</p></div></div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <section class="card"><div class="card-header"><h3>Công nghệ sử dụng</h3></div><div class="card-body"><table style="width:100%;"><tr><td style="padding:8px 0; font-weight:600;">Mô hình nghiên cứu</td><td>Scikit-learn + Logistic Regression</td></tr><tr><td style="padding:8px 0; font-weight:600;">Nền tảng</td><td>Python Flask</td></tr><tr><td style="padding:8px 0; font-weight:600;">Giao diện</td><td>HTML, CSS, JavaScript</td></tr><tr><td style="padding:8px 0; font-weight:600;">Dữ liệu</td><td>SQLite trong bản demo</td></tr></table></div></section>
+        <section class="card"><div class="card-header"><h3>Thông số hiển thị</h3></div><div class="card-body"><table style="width:100%;"><tr><td style="padding:8px 0; font-weight:600;">SOFA</td><td>Điểm tổng hợp suy cơ quan</td></tr><tr><td style="padding:8px 0; font-weight:600;">MAP</td><td>Huyết áp động mạch trung bình</td></tr><tr><td style="padding:8px 0; font-weight:600;">PaO₂/FiO₂</td><td>Chỉ số oxy hóa máu</td></tr><tr><td style="padding:8px 0; font-weight:600;">GCS</td><td>Mức độ ý thức Glasgow</td></tr></table></div></section>
+    </div>
+</div>
+{% endblock %}

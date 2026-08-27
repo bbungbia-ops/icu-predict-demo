@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: icu-predict-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --bind 0.0.0.0:$PORT deployment:application
+    healthCheckPath: /login
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LICENSE_ADMIN_SECRET_KEY
+        generateValue: true
+      - key: ICU_INTEGRATION_SHARED_SECRET
+        generateValue: true
+      - key: ICU_PREDICT_DEMO_MODE
+        value: "false"
+      - key: LICENSE_ADMIN_DEMO_MODE
+        value: "false"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: DATABASE_URL
+        sync: false
+      - key: LICENSE_VALIDATION_URL
+        sync: false
+      - key: SEPAY_WEBHOOK_SECRET
+        sync: false
+      - key: LICENSE_ADMIN_USERNAME
+        sync: false
+      - key: LICENSE_ADMIN_PASSWORD
+        sync: false
+      - key: ICU_PREDICT_ADMIN_USERNAME
+        sync: false
+      - key: ICU_PREDICT_ADMIN_PASSWORD
+        sync: false
+      - key: PAYMENT_BANK_NAME
+        sync: false
+      - key: PAYMENT_ACCOUNT_NUMBER
+        sync: false
+      - key: PAYMENT_ACCOUNT_NAME
+        sync: false

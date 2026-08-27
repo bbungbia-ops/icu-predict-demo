@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Nhật ký đánh giá - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div><div class="eyebrow">NHẬT KÝ KIỂM TOÁN</div><h1>Nhật ký đánh giá</h1><div class="breadcrumb">Dấu vết bản ghi, trạng thái xác nhận và phiên bản mô hình nghiên cứu.</div></div>
+    <a href="{{ url_for('predictions.predict_form') }}" class="btn btn-primary" id="btn-new-prediction-hist">Tạo bản ghi đánh giá</a>
+</div>
+<div class="page-body">
+    <div class="research-banner"><div class="research-banner-icon">i</div><div><strong>Nhật ký nghiên cứu</strong><span>Tín hiệu mô hình không phải xác suất lâm sàng và không thay thế đánh giá của bác sĩ.</span></div></div>
+    <div class="card"><div class="table-container"><table class="priority-table">
+        <thead><tr><th>#</th><th>Bệnh nhân</th><th>Tín hiệu nghiên cứu</th><th>Trạng thái đánh giá</th><th>Phiên bản mô hình</th><th>Người tạo</th><th>Thời gian</th><th></th></tr></thead>
+        <tbody>
+            {% for p in predictions %}
+            <tr>
+                <td>{{ p.id }}</td>
+                <td>{% if p.patient_name %}<strong>{{ p.patient_code }}</strong><span class="table-subtitle">{{ p.patient_name }}</span>{% else %}<span class="table-subtitle">Chưa gắn bệnh nhân</span>{% endif %}</td>
+                <td><span class="signal-badge signal-{{ p.signal.key }}">{{ p.signal.label }}</span></td>
+                <td>{% if p.acknowledged_at %}<span class="data-state ready">Đã xác nhận</span>{% else %}<span class="data-state caution">Chờ đánh giá</span>{% endif %}</td>
+                <td><span class="table-subtitle">{{ p.model_version or 'Bản ghi demo cũ' }}</span></td>
+                <td>{{ p.doctor_name or '-' }}</td>
+                <td class="table-subtitle">{{ p.predicted_at }}</td>
+                <td><a href="{{ url_for('predictions.result', prediction_id=p.id) }}" class="table-action">Mở bản ghi</a></td>
+            </tr>
+            {% endfor %}
+            {% if not predictions %}<tr><td colspan="8"><div class="empty-workspace"><strong>Chưa có bản ghi đánh giá</strong><span>Tạo bản ghi đầu tiên để bắt đầu quy trình.</span></div></td></tr>{% endif %}
+        </tbody>
+    </table></div></div>
+</div>
+{% endblock %}

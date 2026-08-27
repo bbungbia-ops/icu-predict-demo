@@ -1,0 +1,13 @@
+{% extends 'license_admin/layout.html' %}
+{% block title %}Đơn hàng · License Admin{% endblock %}
+{% block content %}
+<header class="page-header"><div><div class="eyebrow">ĐƠN HÀNG</div><h1>Quản lý đơn hàng</h1><p>Mỗi đơn hàng tạo đúng một license key chờ thanh toán.</p></div><a class="button primary" href="{{ url_for('license_portal.order_create') }}">Tạo đơn hàng</a></header>
+<section class="card"><div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Tổ chức</th><th>Gói</th><th>Nội dung CK</th><th>Giá trị</th><th>Thanh toán</th><th>License</th><th></th></tr></thead><tbody>
+{% for order in orders %}<tr>
+    <td><strong>{{ order.order_code }}</strong><small>{{ order.created_at }}</small></td><td>{{ order.organization_name }}</td><td>{{ plan_name(order.plan_code) }}</td>
+    <td><code>{{ order.transfer_content }}</code></td><td>{{ format_vnd(order.amount_vnd) }}</td>
+    <td><span class="badge {{ order.payment_status }}">{{ order_status_label(order.payment_status) }}</span></td>
+    <td><code>{{ order.license_key }}</code></td><td><a href="{{ url_for('license_portal.order_detail', order_id=order.id) }}">Chi tiết</a></td>
+</tr>{% else %}<tr><td colspan="8" class="empty">Chưa có đơn hàng nào.</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

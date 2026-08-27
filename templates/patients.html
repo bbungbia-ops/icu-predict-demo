@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Bệnh nhân - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Quản lý bệnh nhân</h1>
+        <div class="breadcrumb">Danh sách bệnh nhân đang theo dõi</div>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('addPatientModal').classList.add('active')" id="btn-add-patient">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Thêm bệnh nhân
+    </button>
+</div>
+
+<div class="page-body">
+    <!-- Search -->
+    <div class="card mb-3">
+        <div class="card-body" style="padding: 16px 24px;">
+            <form method="GET" class="search-bar">
+                <div class="search-input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" name="search" class="form-control" placeholder="Tìm theo tên hoặc mã bệnh nhân..." value="{{ search }}" id="search-input">
+                </div>
+                <select name="status" class="form-control" style="width: 160px;" onchange="this.form.submit()">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>Tất cả</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Đang điều trị</option>
+                    <option value="discharged" {% if status_filter == 'discharged' %}selected{% endif %}>Đã xuất viện</option>
+                </select>
+                <button type="submit" class="btn btn-outline btn-sm">Tìm kiếm</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient List -->
+    <div class="card">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã BN</th>
+                        <th>Họ tên</th>
+                        <th>Tuổi</th>
+                        <th>Giới tính</th>
+                        <th>Khoa</th>
+                        <th>Ngày nhập viện</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td><strong>{{ patient.patient_code }}</strong></td>
+                        <td>{{ patient.name }}</td>
+                        <td>{{ patient.age or '-' }}</td>
+                        <td>{{ patient.gender or '-' }}</td>
+                        <td>{{ patient.ward or '-' }}</td>
+                        <td>{{ patient.admission_date or '-' }}</td>
+                        <td>
+                            {% if patient.status == 'active' %}
+                            <span class="badge badge-success">Đang điều trị</span>
+                            {% else %}
+                            <span class="badge badge-info">Đã xuất viện</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('patients.patient_detail', patient_id=patient.id) }}" class="btn btn-ghost btn-sm" title="Xem chi tiết">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                                <a href="{{ url_for('predictions.predict_form') }}?patient_id={{ patient.id }}" class="btn btn-ghost btn-sm" title="Tạo bản ghi đánh giá">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not patients %}
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                <h3>Chưa có bệnh nhân</h3>
+                                <p>Bấm “Thêm bệnh nhân” để bắt đầu</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Patient Modal -->
+<div class="modal-overlay" id="addPatientModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Thêm bệnh nhân mới</h3>
+            <button class="btn-ghost" onclick="document.getElementById('addPatientModal').classList.remove('active')" id="btn-close-modal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <form method="POST" action="{{ url_for('patients.add_patient') }}">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="patient_code">Mã bệnh nhân *</label>
+                        <input type="text" id="patient_code" name="patient_code" class="form-control" placeholder="VD: BN015" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="patient_name">Họ và tên *</label>
+                        <input type="text" id="patient_name" name="name" class="form-control" placeholder="Nhập họ tên" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Tuổi</label>
+                        <input type="number" id="age" name="age" class="form-control" placeholder="VD: 65" min="0" max="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Giới tính</label>
+                        <select id="gender" name="gender" class="form-control">
+                            <option value="">-- Chọn --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ward">Khoa</label>
+                        <input type="text" id="ward" name="ward" class="form-control" placeholder="VD: ICU-1">
+                    </div>
+                    <div class="form-group">
+                        <label for="admission_date">Ngày nhập viện</label>
+                        <input type="date" id="admission_date" name="admission_date" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Ghi chú</label>
+                    <textarea id="notes" name="notes" class="form-control" placeholder="Ghi chú thêm..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addPatientModal').classList.remove('active')">Hủy</button>
+                <button type="submit" class="btn btn-primary" id="btn-submit-patient">Thêm bệnh nhân</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

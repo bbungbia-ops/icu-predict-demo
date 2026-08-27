@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Đơn hàng {{ order.order_code }} - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">ĐƠN HÀNG {{ order.order_code }}</div>
+        <h1>{{ 'License đã được kích hoạt' if order.license_status == 'active' else 'Hoàn tất thanh toán để kích hoạt key' }}</h1>
+        <div class="breadcrumb">{{ plan.name }} · {{ price }} / {{ period }}</div>
+    </div>
+    <a href="{{ url_for('account.subscription') }}" class="btn btn-outline">Quay lại gói dịch vụ</a>
+</div>
+
+<div class="page-body">
+    {% if order.license_status == 'active' %}
+    <section class="card checkout-success-card">
+        <div class="status-hero complete"><span class="status-dot"></span>License đang hoạt động</div>
+        <p>Giao dịch đã được xác nhận. Key này đã được gắn với tổ chức của bạn và sẽ được kiểm tra khi triển khai có bật kiểm soát license.</p>
+        <div class="checkout-key"><span>License key</span><code>{{ order.license_key }}</code></div>
+    </section>
+    {% else %}
+    <section class="card checkout-status-card">
+        <div class="status-hero pending"><span class="status-dot"></span>Đang chờ xác nhận thanh toán</div>
+        <p>Chuyển khoản đúng số tiền và <strong>đúng nội dung</strong> bên dưới. Hệ thống chỉ kích hoạt key sau khi nhận webhook ngân hàng hợp lệ; việc mở trang này hoặc bấm nút không thể tự kích hoạt key.</p>
+    </section>
+    {% endif %}
+
+    <div class="checkout-grid">
+        <section class="card checkout-payment-card">
+            <div class="card-header"><div><div class="eyebrow">THÔNG TIN CHUYỂN KHOẢN</div><h2>{{ price }}</h2></div><span class="data-state {{ 'ready' if order.payment_status == 'paid' else 'caution' }}">{{ 'Đã thanh toán' if order.payment_status == 'paid' else 'Chờ thanh toán' }}</span></div>
+            <dl class="checkout-details">
+                <div><dt>Ngân hàng</dt><dd>{{ bank_name }}</dd></div>
+                <div><dt>Số tài khoản</dt><dd><code>{{ account_number }}</code></dd></div>
+                <div><dt>Chủ tài khoản</dt><dd>{{ account_name }}</dd></div>
+                <div><dt>Số tiền</dt><dd><strong>{{ price }}</strong></dd></div>
+                <div><dt>Nội dung chuyển khoản</dt><dd><code class="transfer-code">{{ order.transfer_content }}</code></dd></div>
+            </dl>
+            {% if config.DEMO_MODE %}
+            <div class="inline-alert">Đây là thông tin mô phỏng cục bộ. Trước khi vận hành thật, cần thay bằng tài khoản thụ hưởng đã được xác minh và kết nối webhook của ngân hàng/cổng thanh toán.</div>
+            {% endif %}
+        </section>
+
+        <aside class="card checkout-order-card">
+            <div class="eyebrow">CHI TIẾT KEY</div>
+            <h3>{{ plan.name }}</h3>
+            <dl class="checkout-details compact">
+                <div><dt>Mã đơn</dt><dd>{{ order.order_code }}</dd></div>
+                <div><dt>Thời hạn</dt><dd>{{ period }}</dd></div>
+                <div><dt>Thiết bị/môi trường</dt><dd>{{ order.max_devices }}</dd></div>
+                <div><dt>Key</dt><dd>{% if order.license_status == 'active' %}<code>{{ order.license_key }}</code>{% else %}Sẽ hiển thị khi kích hoạt{% endif %}</dd></div>
+                <div><dt>Hết hạn</dt><dd>{{ order.expires_at or 'Chờ kích hoạt' }}</dd></div>
+            </dl>
+            <a href="{{ url_for('account.customer_order', order_id=order.id) }}" class="btn btn-outline btn-block">Cập nhật trạng thái</a>
+        </aside>
+    </div>
+
+    <section class="commercial-note-card checkout-note">
+        <div><div class="eyebrow">AN TOÀN THANH TOÁN</div><h3>Không kích hoạt dựa trên ảnh chuyển khoản</h3><p>Key chỉ đổi sang trạng thái hoạt động khi hệ thống nhận giao dịch có chữ ký webhook hợp lệ, khớp mã đơn, nội dung và số tiền. Điều này ngăn nhầm lẫn hoặc kích hoạt sai.</p></div>
+        <div class="commercial-note-list"><span>✓ Key theo từng tổ chức</span><span>✓ Không truyền dữ liệu bệnh nhân</span><span>✓ Có nhật ký giao dịch tại License Admin</span></div>
+    </section>
+</div>
+{% endblock %}

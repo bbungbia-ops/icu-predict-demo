@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Tài khoản & gói dịch vụ - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">TÀI KHOẢN TỔ CHỨC</div>
+        <h1>Tài khoản & gói dịch vụ</h1>
+        <div class="breadcrumb">{{ organization.name if organization else 'Tổ chức chưa xác định' }}{% if organization %} · {{ organization.organization_code }}{% endif %}</div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="research-banner" role="note">
+        <div class="research-banner-icon">i</div>
+        <div><strong>Mua key theo tổ chức</strong><span>Bạn chọn gói, hệ thống tạo một đơn cùng key chờ thanh toán. Key chỉ được kích hoạt sau khi giao dịch được xác nhận tự động.</span></div>
+    </div>
+
+    {% if current_subscription and current_plan %}
+    <section class="subscription-hero">
+        <div class="subscription-identity">
+            <div class="subscription-mark">{{ current_plan.name[0] }}</div>
+            <div>
+                <div class="eyebrow">{{ 'LICENSE ĐANG HOẠT ĐỘNG' if current_subscription.status == 'active' else 'ĐƠN HÀNG ĐANG XỬ LÝ' }}</div>
+                <h2>{{ current_plan.name }}</h2>
+                <p>{{ organization.name }}{% if current_subscription.order_id %} · Đơn #{{ current_subscription.order_id }}{% endif %}</p>
+            </div>
+        </div>
+        <div class="subscription-status">
+            <span class="data-state {{ 'ready' if current_subscription.status == 'active' else 'caution' }}">{{ 'Đang hoạt động' if current_subscription.status == 'active' else 'Chờ thanh toán' }}</span>
+            <strong>{{ current_monthly_price }} / tháng</strong>
+            <small>{{ current_payment_term }}</small>
+        </div>
+    </section>
+
+    <div class="subscription-facts">
+        <div class="subscription-fact"><span>Thời hạn</span><strong>{{ current_subscription.starts_on }} → {{ current_subscription.renews_on or 'Chờ kích hoạt' }}</strong><small>{{ 'Tính từ thời điểm thanh toán thành công' if current_subscription.status != 'active' else 'Ngày hết hạn của license' }}</small></div>
+        <div class="subscription-fact"><span>Quyền sử dụng</span><strong>{{ current_subscription.max_devices }} thiết bị/môi trường</strong><small>Theo key đã tạo cho tổ chức</small></div>
+        <div class="subscription-fact"><span>License key</span><strong>{% if current_subscription.status == 'active' and current_subscription.license_key %}<code>{{ current_subscription.license_key }}</code>{% else %}Sẽ hiển thị khi kích hoạt{% endif %}</strong><small>Không chia sẻ key ra ngoài tổ chức</small></div>
+    </div>
+
+    {% if current_subscription.order_id %}
+    <div class="request-state"><span class="status-dot"></span><div><strong>{{ 'Đơn hàng đã được kích hoạt.' if current_subscription.status == 'active' else 'Đơn hàng đang chờ giao dịch ngân hàng được xác nhận.' }}</strong><span><a href="{{ url_for('account.customer_order', order_id=current_subscription.order_id) }}">Xem hướng dẫn thanh toán và trạng thái đơn hàng</a></span></div></div>
+    {% endif %}
+    {% else %}
+    <section class="card no-subscription-card"><div class="card-body"><div class="eyebrow">CHƯA CÓ LICENSE</div><h2>Chọn gói để bắt đầu</h2><p>Tài khoản tổ chức chưa có license đang hoạt động. Bạn có thể tạo đơn và thanh toán theo hướng dẫn ngay bên dưới.</p></div></section>
+    {% endif %}
+
+    <section class="plan-section">
+        <div class="section-title-row"><div><div class="eyebrow">DANH MỤC GÓI DỊCH VỤ</div><h2>Giá và thời hạn đồng bộ với cổng License Admin</h2></div><p>Mỗi gói dưới đây dùng cùng dữ liệu khi tạo key ở cổng quản trị. Không có bảng giá riêng trên hai website.</p></div>
+        <div class="plan-grid">
+            {% for plan in plans %}
+            <article class="plan-card {{ 'current' if current_plan and plan.code == current_plan.code else '' }} {{ 'featured' if plan.code == 'core' else '' }}">
+                <div class="plan-card-top"><span class="plan-badge">{{ 'Gói hiện tại' if current_plan and plan.code == current_plan.code else plan.badge }}</span><h3>{{ plan.name }}</h3><p>{{ plan.description }}</p></div>
+                <div class="plan-price"><strong>{{ plan.monthly_price }}</strong><span>{% if plan.amount_vnd %} / tháng{% endif %}</span><small>{{ plan.payment_term }}</small></div>
+                <ul class="plan-features">{% for feature in plan.features %}<li>{{ feature }}</li>{% endfor %}</ul>
+                {% if current_subscription and current_subscription.order_id and current_subscription.status in ['pending_payment', 'active'] %}
+                <a class="btn btn-outline plan-button" href="{{ url_for('account.customer_order', order_id=current_subscription.order_id) }}">{{ 'Xem đơn hàng' if current_subscription.status == 'pending_payment' else 'Đang sử dụng' }}</a>
+                {% elif current_subscription and current_subscription.status == 'active' and current_plan and plan.code == current_plan.code %}
+                <button type="button" class="btn btn-outline plan-button" disabled>Đang sử dụng</button>
+                {% elif plan.amount_vnd is none %}
+                <a href="mailto:hello@icupredict.vn?subject=Yeu%20cau%20bao%20gia%20ICU%20Predict" class="btn btn-outline plan-button">Yêu cầu báo giá</a>
+                {% else %}
+                <form method="post" action="{{ url_for('account.purchase_plan') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="plan_code" value="{{ plan.code }}">
+                    <button type="submit" class="btn {{ 'btn-primary' if plan.code == 'core' else 'btn-outline' }} plan-button">Tạo đơn & mua key</button>
+                </form>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="commercial-note-card">
+        <div><div class="eyebrow">CÁCH KÍCH HOẠT</div><h3>Đơn hàng → chuyển khoản → key hoạt động</h3><p>Sau khi bạn tạo đơn, hãy chuyển đúng số tiền và nội dung được hiển thị. Cổng license chỉ kích hoạt key khi webhook ngân hàng có chữ ký hợp lệ, đúng số tiền và đúng nội dung chuyển khoản.</p></div>
+        <div class="commercial-note-list"><span>✓ Giá lấy từ một danh mục dùng chung</span><span>✓ Mỗi tổ chức có key riêng</span><span>✓ Không gửi dữ liệu bệnh nhân sang hệ thống thanh toán</span></div>
+    </section>
+</div>
+{% endblock %}

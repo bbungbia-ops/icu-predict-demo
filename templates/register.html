@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Tạo tài khoản tổ chức - ICU Predict{% endblock %}
+
+{% block body %}
+<div class="login-page">
+    <div class="login-card register-card">
+        <div class="login-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <h1>Tạo tài khoản tổ chức</h1>
+            <p>Tạo quản trị viên đầu tiên, sau đó chọn gói và mua license key.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}<div class="alert alert-{{ category }}" style="margin-bottom: 16px;">{{ message }}</div>{% endfor %}{% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="organization_name">Tên tổ chức / bệnh viện</label>
+                <input type="text" id="organization_name" name="organization_name" class="form-control" maxlength="150" required autocomplete="organization" placeholder="Ví dụ: Bệnh viện Đa khoa Minh Tâm">
+            </div>
+            <div class="form-group">
+                <label for="full_name">Họ và tên người phụ trách</label>
+                <input type="text" id="full_name" name="full_name" class="form-control" maxlength="100" required autocomplete="name" placeholder="Ví dụ: Nguyễn Minh Anh">
+            </div>
+            <div class="form-group">
+                <label for="email">Email công việc</label>
+                <input type="email" id="email" name="email" class="form-control" maxlength="150" required autocomplete="email" placeholder="ban@example.vn">
+            </div>
+            <div class="form-group">
+                <label for="username">Tên đăng nhập</label>
+                <input type="text" id="username" name="username" class="form-control" minlength="4" maxlength="40" required autocomplete="username" pattern="[a-zA-Z0-9._-]+" placeholder="Ví dụ: minh.anh">
+                <small class="form-help">Dùng chữ, số, dấu chấm, gạch dưới hoặc gạch ngang.</small>
+            </div>
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" name="password" class="form-control" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="Tối thiểu 8 ký tự">
+            </div>
+            <div class="form-group">
+                <label for="password_confirm">Xác nhận mật khẩu</label>
+                <input type="password" id="password_confirm" name="password_confirm" class="form-control" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="Nhập lại mật khẩu">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Tạo tài khoản & chọn gói</button>
+        </form>
+
+        <p class="login-secondary-action">Đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập</a></p>
+    </div>
+</div>
+{% endblock %}

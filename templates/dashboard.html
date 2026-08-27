@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Điều phối đánh giá - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div>
+        <div class="eyebrow">KHÔNG GIAN ĐIỀU PHỐI ICU</div>
+        <h1>Điều phối đánh giá</h1>
+        <div class="breadcrumb">Ưu tiên các bản ghi cần bác sĩ xem xét và lưu dấu vết đánh giá.</div>
+    </div>
+    <a href="{{ url_for('predictions.predict_form') }}" class="btn btn-primary" id="btn-new-prediction">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Tạo bản ghi đánh giá
+    </a>
+</div>
+
+<div class="page-body">
+    <div class="research-banner" role="note">
+        <div class="research-banner-icon">i</div>
+        <div>
+            <strong>Chế độ nghiên cứu</strong>
+            <span>Mô hình {{ latest_model }} chưa được xác thực lâm sàng. Danh sách này hỗ trợ điều phối đánh giá, không phải chỉ định điều trị.</span>
+        </div>
+    </div>
+
+    <div class="stats-grid workflow-stats">
+        <div class="stat-card primary">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="stat-value">{{ total_patients }}</div>
+            <div class="stat-label">Bệnh nhân đang theo dõi</div>
+        </div>
+        <div class="stat-card danger">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="stat-value">{{ pending_review }}</div>
+            <div class="stat-label">Bản ghi chờ đánh giá</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="stat-value">{{ acknowledged_today }}</div>
+            <div class="stat-label">Đã xác nhận hôm nay</div>
+        </div>
+        <div class="stat-card neutral">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg></div>
+            <div class="stat-value">01</div>
+            <div class="stat-label">Quy trình đang hoạt động</div>
+        </div>
+    </div>
+
+    <div class="card priority-card">
+        <div class="card-header priority-card-header">
+            <div>
+                <div class="eyebrow">HÀNG ĐỢI ĐÁNH GIÁ</div>
+                <h3>Danh sách ưu tiên cần bác sĩ xem xét</h3>
+            </div>
+            <span class="queue-count">{{ pending_review }} chờ xử lý</span>
+        </div>
+        <div class="table-container">
+            <table class="priority-table">
+                <thead><tr><th>Bệnh nhân</th><th>Khoa</th><th>Tín hiệu nghiên cứu</th><th>Chất lượng dữ liệu</th><th>Tạo lúc</th><th></th></tr></thead>
+                <tbody>
+                    {% for item in review_queue %}
+                    <tr>
+                        <td><strong>{{ item.patient_code }}</strong><span class="table-subtitle">{{ item.name }}</span></td>
+                        <td>{{ item.ward or 'Chưa phân khoa' }}</td>
+                        <td><span class="signal-badge signal-{{ item.signal.key }}">{{ item.signal.label }}</span></td>
+                        <td>
+                            {% if item.out_of_distribution %}
+                            <span class="data-state caution">Ngoài phạm vi huấn luyện</span>
+                            {% else %}
+                            <span class="data-state ready">Trong phạm vi dữ liệu demo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.predicted_at }}</td>
+                        <td><a href="{{ url_for('predictions.result', prediction_id=item.id) }}" class="table-action">Mở đánh giá</a></td>
+                    </tr>
+                    {% endfor %}
+                    {% if not review_queue %}
+                    <tr><td colspan="6"><div class="empty-workspace"><strong>Không có bản ghi nào đang chờ đánh giá</strong><span>Các bản ghi mới có tín hiệu cần xem xét sẽ xuất hiện tại đây.</span></div></td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="workflow-panel">
+        <div><span class="workflow-step">01</span><strong>Ghi nhận dữ liệu</strong><p>Nhập hoặc đồng bộ thông số có kiểm tra đơn vị.</p></div>
+        <div><span class="workflow-step">02</span><strong>Bác sĩ đánh giá</strong><p>Xem bối cảnh, mức độ tin cậy và ghi nhận nhận định.</p></div>
+        <div><span class="workflow-step">03</span><strong>Lưu nhật ký kiểm toán</strong><p>Quyết định thuộc về bác sĩ và được lưu để quản trị chất lượng.</p></div>
+    </div>
+</div>
+{% endblock %}

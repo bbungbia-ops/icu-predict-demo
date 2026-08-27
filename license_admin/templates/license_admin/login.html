@@ -1,0 +1,16 @@
+{% extends 'license_admin/layout.html' %}
+{% block title %}Đăng nhập · License Admin{% endblock %}
+{% block content %}
+<section class="login-card">
+    <div class="eyebrow">ICU PREDICT</div>
+    <h1>Quản trị License Key</h1>
+    <p>Trang nội bộ để tạo license, quản lý đơn hàng và xác nhận thanh toán.</p>
+    <form method="post" class="form-stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Tên đăng nhập<input name="username" autocomplete="username" required autofocus></label>
+        <label>Mật khẩu<input type="password" name="password" autocomplete="current-password" required></label>
+        <button class="button primary" type="submit">Đăng nhập</button>
+    </form>
+    <small>Chế độ demo cục bộ dùng tài khoản cấu hình trong biến môi trường.</small>
+</section>
+{% endblock %}

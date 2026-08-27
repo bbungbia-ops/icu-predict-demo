@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.name }} - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ patient.name }}</h1>
+        <div class="breadcrumb">Bệnh nhân &gt; {{ patient.patient_code }}</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('predictions.predict_form') }}?patient_id={{ patient.id }}" class="btn btn-primary" id="btn-predict-patient">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Tạo bản ghi đánh giá
+        </a>
+    </div>
+</div>
+
+<div class="page-body">
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 24px;">
+        <!-- Patient Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Thông tin bệnh nhân</h3>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Mã bệnh nhân</div>
+                    <div style="font-weight: 600;">{{ patient.patient_code }}</div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Tuổi</div>
+                    <div style="font-weight: 600;">{{ patient.age or 'Chưa cập nhật' }}</div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Giới tính</div>
+                    <div style="font-weight: 600;">{{ patient.gender or 'Chưa cập nhật' }}</div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Khoa điều trị</div>
+                    <div style="font-weight: 600;">{{ patient.ward or 'Chưa cập nhật' }}</div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Ngày nhập viện</div>
+                    <div style="font-weight: 600;">{{ patient.admission_date or 'Chưa cập nhật' }}</div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Trạng thái</div>
+                    <div>
+                        {% if patient.status == 'active' %}
+                        <span class="badge badge-success">Đang điều trị</span>
+                        {% else %}
+                        <span class="badge badge-info">Đã xuất viện</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if patient.notes %}
+                <div>
+                    <div style="font-size: 0.78rem; color: var(--gray-500); margin-bottom: 2px;">Ghi chú</div>
+                    <div>{{ patient.notes }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Assessment history -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Nhật ký đánh giá</h3>
+                <span class="badge badge-info">{{ predictions|length }} bản ghi</span>
+            </div>
+            <div class="card-body">
+                {% if predictions %}
+                <div class="timeline">
+                    {% for p in predictions %}
+                    <div class="timeline-item {{ p.signal.key }}">
+                        <div class="timeline-date">{{ p.predicted_at }} - BS. {{ p.doctor_name or 'N/A' }}</div>
+                        <div class="timeline-content">
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: 4px;">
+                                    <span class="badge {{ 'badge-danger' if p.signal.key == 'high' else 'badge-warning' if p.signal.key == 'medium' else 'badge-success' }}">Tín hiệu nghiên cứu: {{ p.signal.label }}</span>
+                                </div>
+                                <div style="font-size: 0.82rem; color: var(--gray-500);">
+                                    {% if p.acknowledged_at %}Đã xác nhận đánh giá{% else %}Chờ xác nhận đánh giá{% endif %} · SOFA: {{ p.sofa }} | MAP: {{ p.map_value }} | PaO2/FiO2: {{ p.pao2_fio2 }}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('predictions.result', prediction_id=p.id) }}" class="btn btn-outline btn-sm">Chi tiết</a>
+                                <a href="{{ url_for('reports.generate_report', prediction_id=p.id) }}" class="btn btn-ghost btn-sm" title="Tai PDF">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h3>Chưa có bản ghi đánh giá</h3>
+                    <p>Tạo bản ghi mới để bắt đầu quy trình.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

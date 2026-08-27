@@ -1,0 +1,146 @@
+{
+  "model_version": "icu-risk-research-v1",
+  "created_at_utc": "2026-08-11T17:06:10.219517+00:00",
+  "model_type": "standardized_logistic_regression",
+  "feature_order": [
+    "map_value",
+    "pao2_fio2",
+    "bilirubin",
+    "creatinine",
+    "platelet",
+    "gcs"
+  ],
+  "excluded_feature": {
+    "name": "sofa",
+    "reason": "SOFA is a composite of organ-system measures already represented by the raw inputs."
+  },
+  "target": {
+    "source_column": "Outcome",
+    "definition": "Unknown in the supplied dataset; must be explicitly defined before clinical validation.",
+    "prediction_horizon": "Unknown; no 24-hour, 48-hour, mortality, or deterioration claim is permitted."
+  },
+  "dataset": {
+    "file": "data.json",
+    "sha256": "f93c6b19e5baa89edbc042516ff1e64c6fb88f3c82bcdddff52477e9bfef8552",
+    "rows": 100,
+    "positive_cases": 45,
+    "negative_cases": 55,
+    "provenance": "Unverified / demonstration dataset"
+  },
+  "input_plausibility_limits": {
+    "sofa": {
+      "min": 0,
+      "max": 24
+    },
+    "map_value": {
+      "min": 0,
+      "max": 250
+    },
+    "pao2_fio2": {
+      "min": 0,
+      "max": 800
+    },
+    "bilirubin": {
+      "min": 0,
+      "max": 60
+    },
+    "creatinine": {
+      "min": 0,
+      "max": 30
+    },
+    "platelet": {
+      "min": 0,
+      "max": 2000
+    },
+    "gcs": {
+      "min": 3,
+      "max": 15
+    }
+  },
+  "training_feature_bounds": {
+    "map_value": {
+      "min": 36.0,
+      "max": 95.0
+    },
+    "pao2_fio2": {
+      "min": 40.0,
+      "max": 450.0
+    },
+    "bilirubin": {
+      "min": 0.3,
+      "max": 6.5
+    },
+    "creatinine": {
+      "min": 0.5,
+      "max": 5.8
+    },
+    "platelet": {
+      "min": 25.0,
+      "max": 350.0
+    },
+    "gcs": {
+      "min": 3.0,
+      "max": 15.0
+    }
+  },
+  "evaluation": {
+    "holdout": {
+      "test_rows": 20,
+      "threshold": 0.5,
+      "metrics": {
+        "roc_auc": 1.0,
+        "average_precision": 1.0,
+        "brier_score": 0.0002,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "precision": 1.0,
+        "confusion_matrix": {
+          "tn": 11,
+          "fp": 0,
+          "fn": 0,
+          "tp": 9
+        }
+      }
+    },
+    "cross_validation": {
+      "folds": 5,
+      "roc_auc": {
+        "mean": 1.0,
+        "range": [
+          1.0,
+          1.0
+        ]
+      },
+      "average_precision": {
+        "mean": 1.0,
+        "range": [
+          1.0,
+          1.0
+        ]
+      },
+      "brier_score": {
+        "mean": 0.0113,
+        "range": [
+          0.0006,
+          0.0206
+        ]
+      }
+    }
+  },
+  "clinical_use": {
+    "status": "research_prototype_only",
+    "prohibited_claims": [
+      "clinical accuracy",
+      "mortality prediction",
+      "deterioration within a stated time horizon",
+      "treatment recommendation"
+    ],
+    "required_before_clinical_use": [
+      "clinician-defined target and cohort",
+      "approved de-identified data",
+      "temporal and external validation",
+      "calibration and threshold governance",
+      "privacy, security, and regulatory review"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+KẾ HOẠCH LÀM VIỆC NHÓM (23/08 – 10/09/2026)
+───────────────────────────────────────────────
+
+Mục tiêu: Xây dựng Web quản lý License Key cho ICU Predict, tích hợp
+thanh toán ngân hàng tự động.
+
+───────────────────────────────────────────────
+TUẦN 1 (23/08 – 29/08): Dựng Web License Key
+───────────────────────────────────────────────
+- Tạo project Flask mới (license_admin), thiết kế database
+- Làm chức năng tạo key theo 4 gói (Pilot / Core / Pro / Enterprise)
+- Giao diện: trang tạo key, danh sách key, chi tiết key
+- Quản lý đơn hàng cơ bản
+
+───────────────────────────────────────────────
+TUẦN 2 (30/08 – 05/09): Bank API + Liên kết
+───────────────────────────────────────────────
+- Tích hợp webhook ngân hàng (nhận thông báo CK tự động)
+- Tự động kích hoạt key khi thanh toán thành công
+- ICU Predict kiểm tra key khi đăng nhập
+
+───────────────────────────────────────────────
+TUẦN 3 (06/09 – 10/09): Hoàn thiện + Demo
+───────────────────────────────────────────────
+- Fix bug, xử lý key hết hạn, CK sai
+- Viết hướng dẫn sử dụng
+- Chuẩn bị demo
+
+★ DEADLINE: 10/09 — Sản phẩm sẵn sàng demo
+───────────────────────────────────────────────
