@@ -57,6 +57,7 @@ không chứa giá trị bí mật.
    | `LICENSE_ADMIN_USERNAME` / `LICENSE_ADMIN_PASSWORD` | Tài khoản quản trị key mới, mạnh |
    | `ICU_PREDICT_ADMIN_USERNAME` / `ICU_PREDICT_ADMIN_PASSWORD` | Tài khoản quản trị demo mới, mạnh |
    | `PAYMENT_BANK_NAME` | Tên ngân hàng đã liên kết SePay |
+   | `PAYMENT_BANK_CODE` | Mã ngắn ngân hàng cho QR SePay, ví dụ `TPBank` |
    | `PAYMENT_ACCOUNT_NUMBER` | Số tài khoản nhận tiền |
    | `PAYMENT_ACCOUNT_NAME` | Tên chủ tài khoản |
    | `LICENSE_VALIDATION_URL` | Để trống lần deploy đầu; điền ở bước 4 |

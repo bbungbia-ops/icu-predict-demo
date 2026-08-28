@@ -39,6 +39,7 @@ class Config:
     APP_VERSION = os.environ.get('ICU_PREDICT_APP_VERSION', 'demo-2026.08')
     LICENSE_VALIDATION_TIMEOUT_SECONDS = float(os.environ.get('LICENSE_VALIDATION_TIMEOUT_SECONDS', '5'))
     PAYMENT_BANK_NAME = os.environ.get('PAYMENT_BANK_NAME', 'Ngân hàng mô phỏng cho bản demo')
+    PAYMENT_BANK_CODE = os.environ.get('PAYMENT_BANK_CODE', '')
     PAYMENT_ACCOUNT_NUMBER = os.environ.get('PAYMENT_ACCOUNT_NUMBER', '0000 0000 0000')
     PAYMENT_ACCOUNT_NAME = os.environ.get('PAYMENT_ACCOUNT_NAME', 'ICU PREDICT DEMO')
     SESSION_COOKIE_HTTPONLY = True

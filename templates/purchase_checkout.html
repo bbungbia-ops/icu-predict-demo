@@ -35,6 +35,14 @@
                 <div><dt>Số tiền</dt><dd><strong>{{ price }}</strong></dd></div>
                 <div><dt>Nội dung chuyển khoản</dt><dd><code class="transfer-code">{{ order.transfer_content }}</code></dd></div>
             </dl>
+            {% if order.license_status != 'active' and sepay_qr_url %}
+            <figure class="checkout-qr">
+                <img src="{{ sepay_qr_url }}" alt="Mã QR thanh toán SePay cho đơn hàng {{ order.order_code }}">
+                <figcaption>Quét QR bằng ứng dụng ngân hàng. Số tiền và nội dung chuyển khoản đã được điền sẵn để SePay đối soát tự động.</figcaption>
+            </figure>
+            {% elif order.license_status != 'active' %}
+            <div class="inline-alert">Chưa thể tạo QR vì thông tin tài khoản nhận tiền chưa được cấu hình đầy đủ. Vui lòng liên hệ ICU Predict trước khi chuyển khoản.</div>
+            {% endif %}
             {% if config.DEMO_MODE %}
             <div class="inline-alert">Đây là thông tin mô phỏng cục bộ. Trước khi vận hành thật, cần thay bằng tài khoản thụ hưởng đã được xác minh và kết nối webhook của ngân hàng/cổng thanh toán.</div>
             {% endif %}
@@ -59,4 +67,19 @@
         <div class="commercial-note-list"><span>✓ Key theo từng tổ chức</span><span>✓ Không truyền dữ liệu bệnh nhân</span><span>✓ Có nhật ký giao dịch tại License Admin</span></div>
     </section>
 </div>
+{% if order.license_status != 'active' %}
+<script>
+    (() => {
+        const statusUrl = {{ url_for('account.customer_order_status', order_id=order.id) | tojson }};
+        const checkPayment = () => fetch(statusUrl, {credentials: 'same-origin'})
+            .then(response => response.ok ? response.json() : null)
+            .then(status => {
+                if (status && status.is_active) window.location.reload();
+            })
+            .catch(() => {});
+        window.setInterval(checkPayment, 5000);
+        window.setTimeout(checkPayment, 2000);
+    })();
+</script>
+{% endif %}
 {% endblock %}

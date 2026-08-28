@@ -21,6 +21,10 @@ class ClinicalWorkflowTests(unittest.TestCase):
             TESTING=True,
             DATABASE_PATH=self.db_path,
             LICENSE_ADMIN_DATABASE_PATH=self.license_db_path,
+            PAYMENT_BANK_NAME='TPBank',
+            PAYMENT_BANK_CODE='TPBank',
+            PAYMENT_ACCOUNT_NUMBER='0123456789',
+            PAYMENT_ACCOUNT_NAME='NGUYEN TRUNG DUNG',
         )
         self.client = self.app.test_client()
         login = self.client.post(
@@ -76,12 +80,15 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertIn("ICU Cơ bản".encode(), response.data)
         self.assertIn("15 triệu".encode(), response.data)
         self.assertIn("9 triệu".encode(), response.data)
-        self.assertIn("Thanh toán 45 triệu / 90 ngày".encode(), response.data)
+        self.assertIn("Thanh toán 15 triệu / tháng".encode(), response.data)
+        self.assertIn("Thanh toán 9 triệu / tháng".encode(), response.data)
 
-    def test_plan_catalog_keeps_the_original_monthly_reference_prices(self):
+    def test_plan_catalog_charges_the_monthly_prices(self):
         self.assertEqual(PLAN_CATALOG['pilot']['monthly_amount_vnd'], 15_000_000)
         self.assertEqual(PLAN_CATALOG['core']['monthly_amount_vnd'], 9_000_000)
         self.assertEqual(PLAN_CATALOG['pro']['monthly_amount_vnd'], 18_000_000)
+        self.assertEqual(PLAN_CATALOG['core']['amount_vnd'], 9_000_000)
+        self.assertEqual(PLAN_CATALOG['core']['validity_days'], 30)
 
     def test_registered_customer_can_create_a_license_order(self):
         customer = self.app.test_client()
@@ -113,7 +120,9 @@ class ClinicalWorkflowTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Hoàn tất thanh toán để kích hoạt key".encode(), response.data)
-        self.assertIn("108.000.000 đ".encode(), response.data)
+        self.assertIn("9.000.000 đ".encode(), response.data)
+        self.assertIn("Mã QR thanh toán SePay".encode(), response.data)
+        self.assertIn("THANHTOAN MINHANH".encode(), response.data)
 
         conn = get_db_connection(self.db_path)
         organization = conn.execute(
@@ -126,8 +135,13 @@ class ClinicalWorkflowTests(unittest.TestCase):
         order = get_order(license_conn, organization['license_order_id'])
         license_conn.close()
         self.assertEqual(order['plan_code'], 'core')
-        self.assertEqual(order['amount_vnd'], 108_000_000)
+        self.assertEqual(order['amount_vnd'], 9_000_000)
+        self.assertEqual(order['validity_days'], 30)
+        self.assertTrue(order['transfer_content'].startswith('THANHTOAN MINHANH '))
         self.assertEqual(order['customer_organization_code'], organization['organization_code'])
+
+        status_response = customer.get(f"/account/orders/{order['id']}/status")
+        self.assertEqual(status_response.get_json()['license_status'], 'pending_payment')
 
         license_conn = get_license_connection(self.license_db_path)
         activate_order(

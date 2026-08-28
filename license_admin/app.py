@@ -6,8 +6,10 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import time
+import unicodedata
 from datetime import UTC, datetime
 from functools import wraps
 
@@ -117,13 +119,17 @@ def safe_sepay_payload(payload: dict) -> dict:
     }
 
 
+def normalize_transfer_text(value: str) -> str:
+    """Normalize bank text while preserving the exact reference tokens."""
+    ascii_value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
+    return re.sub(r"[^A-Za-z0-9]", "", ascii_value).upper()
+
+
 def find_pending_order_for_sepay(connection, payment_code: str, content: str):
     """Find an unpaid order through the SePay code, with a safe text fallback.
 
-    The recommended SePay setup extracts ``ICUP-...`` into ``code``.  A
-    fallback for the original transfer text makes reconciliation resilient to a
-    temporarily incomplete SePay payment-code configuration, without accepting
-    partial or ambiguous matches.
+    A SePay payment code is preferred. The fallback handles bank descriptions
+    that altered whitespace or punctuation while accepting only one candidate.
     """
     if payment_code:
         order = connection.execute(
@@ -132,7 +138,7 @@ def find_pending_order_for_sepay(connection, payment_code: str, content: str):
         ).fetchone()
         if order:
             return order
-    normalized_content = content.upper()
+    normalized_content = normalize_transfer_text(content)
     if not normalized_content:
         return None
     matches = [
@@ -140,7 +146,7 @@ def find_pending_order_for_sepay(connection, payment_code: str, content: str):
         for order in connection.execute(
             "SELECT * FROM orders WHERE payment_status = 'pending'"
         ).fetchall()
-        if order["transfer_content"].upper() in normalized_content
+        if normalize_transfer_text(order["transfer_content"]) in normalized_content
     ]
     return matches[0] if len(matches) == 1 else None
 

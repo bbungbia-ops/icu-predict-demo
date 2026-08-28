@@ -38,6 +38,8 @@ services:
         sync: false
       - key: PAYMENT_BANK_NAME
         sync: false
+      - key: PAYMENT_BANK_CODE
+        sync: false
       - key: PAYMENT_ACCOUNT_NUMBER
         sync: false
       - key: PAYMENT_ACCOUNT_NAME

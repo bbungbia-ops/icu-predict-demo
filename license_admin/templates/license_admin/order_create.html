@@ -5,7 +5,7 @@
 <form method="post" class="card form-card" id="order-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-grid">
-        <label>Gói dịch vụ<select name="plan_code" id="plan_code" required>{% for code, plan in plan_catalog.items() %}<option value="{{ code }}">{{ plan.name }} · {{ format_vnd_millions(plan.monthly_amount_vnd) }}/tháng · {{ payment_term_label(plan) }}</option>{% endfor %}</select></label>
+        <label>Gói dịch vụ<select name="plan_code" id="plan_code" required>{% for code, plan in plan_catalog.items() %}<option value="{{ code }}">{{ plan.name }} · {% if plan.amount_vnd %}{{ format_vnd_millions(plan.monthly_amount_vnd) }}/tháng · {{ payment_term_label(plan) }}{% else %}Báo giá và thời hạn theo hợp đồng{% endif %}</option>{% endfor %}</select></label>
         <label>Số thiết bị được phép<input type="number" name="max_devices" min="1" max="500" value="1" required></label>
         <label>Tên tổ chức<input name="organization_name" maxlength="150" required placeholder="Ví dụ: Bệnh viện Demo"></label>
         <label>Người liên hệ<input name="contact_name" maxlength="100" required placeholder="Ví dụ: Nguyễn Minh Anh"></label>

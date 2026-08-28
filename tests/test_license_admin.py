@@ -59,8 +59,8 @@ class LicenseAdminTests(unittest.TestCase):
             organization_name="Bệnh viện Demo",
             contact_name="Nguyễn Minh Anh",
             contact_email="demo@example.com",
-            amount_vnd=108_000_000,
-            validity_days=365,
+            amount_vnd=9_000_000,
+            validity_days=30,
             max_devices=2,
             notes="Kiểm thử tự động",
         )

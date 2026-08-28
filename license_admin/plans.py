@@ -8,13 +8,13 @@ khi giới thiệu, tạo đơn hàng hoặc xác thực key.
 PLAN_CATALOG = {
     "pilot": {
         "name": "Pilot có giám sát",
-        "amount_vnd": 45_000_000,
+        "amount_vnd": 15_000_000,
         "monthly_amount_vnd": 15_000_000,
-        "validity_days": 90,
-        "description": "Một khoa ICU, giai đoạn thử nghiệm có giám sát trong 3 tháng.",
+        "validity_days": 30,
+        "description": "Một khoa ICU, giai đoạn thử nghiệm có giám sát theo tháng.",
         "badge": "Dành cho thử nghiệm",
         "features": [
-            "Một khoa ICU trong 90 ngày",
+            "Một khoa ICU trong 30 ngày",
             "Tối đa 15 giường theo phạm vi thử nghiệm",
             "Tối đa 15 tài khoản sử dụng",
             "Báo cáo tổng kết giai đoạn pilot",
@@ -23,13 +23,13 @@ PLAN_CATALOG = {
     },
     "core": {
         "name": "ICU Cơ bản",
-        "amount_vnd": 108_000_000,
+        "amount_vnd": 9_000_000,
         "monthly_amount_vnd": 9_000_000,
-        "validity_days": 365,
-        "description": "Một khoa ICU, giấy phép sử dụng theo năm.",
+        "validity_days": 30,
+        "description": "Một khoa ICU, giấy phép sử dụng và thanh toán theo tháng.",
         "badge": "Phổ biến",
         "features": [
-            "Một khoa ICU trong 12 tháng",
+            "Một khoa ICU trong 30 ngày",
             "Tối đa 15 giường theo phạm vi triển khai",
             "Hàng đợi đánh giá và nhật ký kiểm toán",
             "Hỗ trợ tiêu chuẩn",
@@ -38,13 +38,13 @@ PLAN_CATALOG = {
     },
     "pro": {
         "name": "ICU Chuyên sâu",
-        "amount_vnd": 216_000_000,
+        "amount_vnd": 18_000_000,
         "monthly_amount_vnd": 18_000_000,
-        "validity_days": 365,
-        "description": "ICU quy mô lớn, hỗ trợ phạm vi tích hợp theo hợp đồng.",
+        "validity_days": 30,
+        "description": "ICU quy mô lớn, hỗ trợ phạm vi tích hợp theo tháng.",
         "badge": "Tích hợp dữ liệu",
         "features": [
-            "ICU quy mô lớn trong 12 tháng",
+            "ICU quy mô lớn trong 30 ngày",
             "Phạm vi tích hợp HIS/EMR theo hợp đồng",
             "Phân quyền và nhật ký kiểm toán nâng cao",
             "Hỗ trợ ưu tiên",
@@ -55,7 +55,7 @@ PLAN_CATALOG = {
         "name": "Doanh nghiệp",
         "amount_vnd": None,
         "monthly_amount_vnd": None,
-        "validity_days": 365,
+        "validity_days": None,
         "description": "Nhiều khoa hoặc toàn bệnh viện; giá và thời hạn theo hợp đồng.",
         "badge": "Toàn bệnh viện",
         "features": [
@@ -89,9 +89,7 @@ def payment_term_label(plan: dict) -> str:
     amount = plan.get("amount_vnd")
     if amount is None:
         return "Giá và thời hạn theo hợp đồng"
+    if plan.get("validity_days") == 30:
+        return f"Thanh toán {format_vnd_millions(amount)} / tháng"
     days = plan.get("validity_days")
-    if days == 90:
-        return f"Thanh toán {format_vnd_millions(amount)} / 90 ngày"
-    if days == 365:
-        return f"Thanh toán {format_vnd_millions(amount)} / năm"
     return f"Thanh toán {format_vnd(amount)} / {days} ngày"

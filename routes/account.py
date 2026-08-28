@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
+from urllib.parse import urlencode
+
+from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, session, url_for
 
 from license_admin.config import Config as LicenseAdminConfig
 from license_admin.database import (
@@ -22,6 +24,8 @@ account_bp = Blueprint('account', __name__)
 
 
 def billing_cycle_label(validity_days: int | None) -> str:
+    if validity_days == 30:
+        return '1 tháng'
     if validity_days == 90:
         return '90 ngày'
     if validity_days == 365:
@@ -81,7 +85,7 @@ def sync_local_subscription(connection, organization, order) -> None:
         ).fetchone()
         values = (
             order['plan_code'],
-            'quarterly' if order['validity_days'] == 90 else 'annual',
+            'monthly' if order['validity_days'] == 30 else ('quarterly' if order['validity_days'] == 90 else 'annual'),
             (order['activated_at'] or order['created_at'])[:10],
             order['expires_at'],
             order['max_devices'],
@@ -230,7 +234,7 @@ def purchase_plan():
             return redirect(url_for('account.customer_order', order_id=existing_order['id']))
 
         user = connection.execute(
-            'SELECT full_name, email FROM users WHERE id = ?', (session['user_id'],)
+            'SELECT username, full_name, email FROM users WHERE id = ?', (session['user_id'],)
         ).fetchone()
         order_id = create_order(
             initialize_license_store(),
@@ -243,6 +247,7 @@ def purchase_plan():
             max_devices=plan['max_devices'],
             notes=f"Đơn tự tạo từ website người dùng · {organization['organization_code']}",
             customer_organization_code=organization['organization_code'],
+            customer_username=user['username'],
         )
         license_connection = get_license_connection(initialize_license_store())
         try:
@@ -279,6 +284,24 @@ def customer_order(order_id: int):
         connection.close()
 
     update_session_license_state(order)
+    bank_code = current_app.config.get('PAYMENT_BANK_CODE', '').strip()
+    account_number = current_app.config['PAYMENT_ACCOUNT_NUMBER'].replace(' ', '').strip()
+    account_name = current_app.config['PAYMENT_ACCOUNT_NAME'].strip()
+    sepay_qr_url = None
+    if bank_code and account_number and account_number != '000000000000':
+        sepay_qr_url = 'https://vietqr.app/img?' + urlencode(
+            {
+                'acc': account_number,
+                'bank': bank_code,
+                'amount': order['amount_vnd'],
+                'des': order['transfer_content'],
+                'template': 'compact',
+                'showinfo': 'true',
+                'fullacc': 'true',
+                'holder': account_name,
+                'store': 'ICU Predict',
+            }
+        )
     return render_template(
         'purchase_checkout.html',
         order=order,
@@ -287,5 +310,29 @@ def customer_order(order_id: int):
         period=billing_cycle_label(order['validity_days']),
         bank_name=current_app.config['PAYMENT_BANK_NAME'],
         account_number=current_app.config['PAYMENT_ACCOUNT_NUMBER'],
-        account_name=current_app.config['PAYMENT_ACCOUNT_NAME'],
+        account_name=account_name,
+        sepay_qr_url=sepay_qr_url,
+    )
+
+
+@account_bp.route('/account/orders/<int:order_id>/status')
+@login_required
+def customer_order_status(order_id: int):
+    """Return the live payment state for the signed-in purchaser's own order."""
+    connection = get_db_connection(current_app.config['DATABASE_PATH'])
+    try:
+        organization = get_current_organization(connection)
+        if not organization or organization['license_order_id'] != order_id:
+            return jsonify({'error': 'not_found'}), 404
+        order = get_customer_order(organization)
+    finally:
+        connection.close()
+    if not order:
+        return jsonify({'error': 'not_found'}), 404
+    return jsonify(
+        {
+            'payment_status': order['payment_status'],
+            'license_status': order['license_status'],
+            'is_active': order['license_status'] == 'active',
+        }
     )

@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import re
 import secrets
+import unicodedata
 from datetime import UTC, datetime, timedelta
 
 from models.database_compat import connect_database, is_postgres_database
@@ -130,6 +132,18 @@ def make_order_code() -> str:
     return f"ORD-{stamp}-{secrets.token_hex(3).upper()}"
 
 
+def make_transfer_content(order_code: str, customer_username: str | None = None) -> str:
+    """Create a readable, unique payment reference for a single invoice."""
+    suffix = order_code.rsplit("-", 1)[-1]
+    if not customer_username:
+        return f"ICUP-{suffix}"
+    ascii_username = unicodedata.normalize("NFKD", customer_username).encode("ascii", "ignore").decode()
+    username_token = re.sub(r"[^A-Za-z0-9]", "", ascii_username).upper()
+    if not username_token:
+        return f"ICUP-{suffix}"
+    return f"THANHTOAN {username_token[:32]} {suffix}"
+
+
 def create_order(
     database_path: str,
     *,
@@ -142,6 +156,7 @@ def create_order(
     max_devices: int,
     notes: str,
     customer_organization_code: str | None = None,
+    customer_username: str | None = None,
 ) -> int:
     connection = get_connection(database_path)
     cursor = connection.cursor()
@@ -177,7 +192,7 @@ def create_order(
     )
     license_id = cursor.lastrowid
     order_code = make_order_code()
-    transfer_content = f"ICUP-{order_code.rsplit('-', 1)[-1]}"
+    transfer_content = make_transfer_content(order_code, customer_username)
     cursor.execute(
         """
         INSERT INTO orders
