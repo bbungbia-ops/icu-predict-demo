@@ -87,6 +87,12 @@ class LicenseAdminTests(unittest.TestCase):
             },
         )
 
+    def test_admin_layout_loads_responsive_stylesheet(self):
+        self.login()
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"css/responsive.css", response.data)
+
     def test_admin_can_create_pending_license_order(self):
         self.login()
         response = self.client.post(

@@ -42,6 +42,12 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertIn("Chế độ nghiên cứu".encode(), response.data)
         self.assertIn("Ưu tiên đánh giá".encode(), response.data)
 
+    def test_customer_layout_includes_mobile_navigation_and_table_hint(self):
+        response = self.client.get("/dashboard")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="mobileNavToggle"', response.data)
+        self.assertIn(b"table-scroll-hint", response.data)
+
     def test_demo_patients_have_vietnamese_names(self):
         conn = get_db_connection(self.db_path)
         patient = conn.execute("SELECT name, gender FROM patients WHERE patient_code = 'BN002'").fetchone()

@@ -13,6 +13,10 @@
 <body>
     {% block body %}
     <div class="app-layout">
+        <button type="button" class="mobile-nav-toggle" id="mobileNavToggle" aria-controls="sidebar" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            <span>Menu</span>
+        </button>
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -96,6 +100,7 @@
                 </div>
             </div>
         </aside>
+        <button type="button" class="sidebar-backdrop" id="sidebarBackdrop" aria-label="Đóng menu"></button>
 
         <!-- Main -->
         <main class="main-content">
@@ -123,6 +128,31 @@
     </div>
     {% endblock %}
 
+    <script>
+    (() => {
+        const toggle = document.getElementById('mobileNavToggle');
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        if (!toggle || !sidebar || !backdrop) return;
+
+        const closeMenu = () => {
+            sidebar.classList.remove('open');
+            document.body.classList.remove('nav-open');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+        const openMenu = () => {
+            sidebar.classList.add('open');
+            document.body.classList.add('nav-open');
+            toggle.setAttribute('aria-expanded', 'true');
+        };
+
+        toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeMenu() : openMenu());
+        backdrop.addEventListener('click', closeMenu);
+        sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
+        window.matchMedia('(min-width: 769px)').addEventListener('change', (event) => { if (event.matches) closeMenu(); });
+    })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

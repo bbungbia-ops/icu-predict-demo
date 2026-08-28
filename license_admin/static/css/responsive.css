@@ -1,0 +1,134 @@
+/* Điều chỉnh riêng cho màn hình nhỏ: giữ thao tác quản trị rõ ràng, dễ chạm. */
+@media (max-width: 900px) {
+    .shell,
+    .content {
+        min-width: 0;
+    }
+
+    .sidebar {
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.16);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sidebar nav a {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        min-height: 42px;
+        text-align: center;
+    }
+
+    .page-header {
+        gap: 14px;
+    }
+
+    .page-header > .button,
+    .header-actions {
+        margin-top: 0;
+    }
+
+    .header-actions {
+        align-items: stretch;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .header-actions .button,
+    .header-actions form {
+        flex: 1 1 180px;
+    }
+
+    .header-actions form .button {
+        width: 100%;
+    }
+
+    .section-heading {
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 560px) {
+    .content {
+        padding: 18px 12px;
+    }
+
+    .sidebar {
+        padding: 11px 12px 12px;
+    }
+
+    .brand {
+        margin-bottom: 10px;
+    }
+
+    .brand-mark {
+        height: 32px;
+        width: 32px;
+    }
+
+    .sidebar nav {
+        gap: 6px;
+    }
+
+    .sidebar nav a {
+        min-height: 40px;
+        padding: 9px 10px;
+    }
+
+    .page-header h1 {
+        font-size: 23px;
+    }
+
+    .metrics {
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .metrics article,
+    .card {
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .section-heading {
+        flex-direction: column;
+    }
+
+    .section-heading .button {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .table-wrap {
+        margin: 0 -4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .form-actions,
+    .header-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .button,
+    .header-actions .button,
+    .header-actions form {
+        flex-basis: auto;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .notice {
+        padding: 14px;
+    }
+
+    .flash-stack {
+        left: 12px;
+        right: 12px;
+        top: 12px;
+        width: auto;
+    }
+}
