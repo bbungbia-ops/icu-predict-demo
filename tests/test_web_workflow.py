@@ -123,6 +123,8 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertIn("9.000.000 đ".encode(), response.data)
         self.assertIn("Mã QR thanh toán SePay".encode(), response.data)
         self.assertIn("THANHTOAN MINHANH".encode(), response.data)
+        self.assertIn("Thanh toán theo tháng".encode(), response.data)
+        self.assertIn(b"checkout-payment-body", response.data)
 
         conn = get_db_connection(self.db_path)
         organization = conn.execute(

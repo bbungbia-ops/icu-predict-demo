@@ -27,22 +27,24 @@
 
     <div class="checkout-grid">
         <section class="card checkout-payment-card">
-            <div class="card-header"><div><div class="eyebrow">THÔNG TIN CHUYỂN KHOẢN</div><h2>{{ price }}</h2></div><span class="data-state {{ 'ready' if order.payment_status == 'paid' else 'caution' }}">{{ 'Đã thanh toán' if order.payment_status == 'paid' else 'Chờ thanh toán' }}</span></div>
-            <dl class="checkout-details">
-                <div><dt>Ngân hàng</dt><dd>{{ bank_name }}</dd></div>
-                <div><dt>Số tài khoản</dt><dd><code>{{ account_number }}</code></dd></div>
-                <div><dt>Chủ tài khoản</dt><dd>{{ account_name }}</dd></div>
-                <div><dt>Số tiền</dt><dd><strong>{{ price }}</strong></dd></div>
-                <div><dt>Nội dung chuyển khoản</dt><dd><code class="transfer-code">{{ order.transfer_content }}</code></dd></div>
-            </dl>
-            {% if order.license_status != 'active' and sepay_qr_url %}
-            <figure class="checkout-qr">
-                <img src="{{ sepay_qr_url }}" alt="Mã QR thanh toán SePay cho đơn hàng {{ order.order_code }}">
-                <figcaption>Quét QR bằng ứng dụng ngân hàng. Số tiền và nội dung chuyển khoản đã được điền sẵn để SePay đối soát tự động.</figcaption>
-            </figure>
-            {% elif order.license_status != 'active' %}
-            <div class="inline-alert">Chưa thể tạo QR vì thông tin tài khoản nhận tiền chưa được cấu hình đầy đủ. Vui lòng liên hệ ICU Predict trước khi chuyển khoản.</div>
-            {% endif %}
+            <div class="card-header"><div><div class="eyebrow">THÔNG TIN CHUYỂN KHOẢN</div><h2>{{ price }}</h2><p class="checkout-term">Thanh toán theo tháng · Key có hiệu lực {{ period }}</p></div><span class="data-state {{ 'ready' if order.payment_status == 'paid' else 'caution' }}">{{ 'Đã thanh toán' if order.payment_status == 'paid' else 'Chờ thanh toán' }}</span></div>
+            <div class="checkout-payment-body">
+                <dl class="checkout-details">
+                    <div><dt>Ngân hàng</dt><dd>{{ bank_name }}</dd></div>
+                    <div><dt>Số tài khoản</dt><dd><code>{{ account_number }}</code></dd></div>
+                    <div><dt>Chủ tài khoản</dt><dd>{{ account_name }}</dd></div>
+                    <div><dt>Số tiền</dt><dd><strong>{{ price }}</strong></dd></div>
+                    <div><dt>Nội dung chuyển khoản</dt><dd><code class="transfer-code">{{ order.transfer_content }}</code></dd></div>
+                </dl>
+                {% if order.license_status != 'active' and sepay_qr_url %}
+                <figure class="checkout-qr">
+                    <img src="{{ sepay_qr_url }}" alt="Mã QR thanh toán SePay cho đơn hàng {{ order.order_code }}">
+                    <figcaption>Quét QR bằng ứng dụng ngân hàng. Số tiền và nội dung chuyển khoản đã được điền sẵn.</figcaption>
+                </figure>
+                {% elif order.license_status != 'active' %}
+                <div class="inline-alert checkout-qr-unavailable">Chưa thể tạo QR vì thông tin tài khoản nhận tiền chưa được cấu hình đầy đủ. Vui lòng liên hệ ICU Predict trước khi chuyển khoản.</div>
+                {% endif %}
+            </div>
             {% if config.DEMO_MODE %}
             <div class="inline-alert">Đây là thông tin mô phỏng cục bộ. Trước khi vận hành thật, cần thay bằng tài khoản thụ hưởng đã được xác minh và kết nối webhook của ngân hàng/cổng thanh toán.</div>
             {% endif %}
