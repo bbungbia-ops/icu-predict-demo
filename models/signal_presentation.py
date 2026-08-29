@@ -33,8 +33,55 @@ _LEVEL_TO_KEY = {
     "Thấp": "low",
 }
 
+REVIEW_OUTCOME_LABELS = {
+    "appropriate": "Tín hiệu hỗ trợ ưu tiên phù hợp",
+    "not_appropriate": "Tín hiệu chưa phù hợp với bối cảnh",
+    "needs_follow_up": "Cần theo dõi thêm trước khi kết luận",
+}
+
 
 def describe_signal(risk_level: str | None) -> dict[str, str]:
     """Trả nhãn điều phối phù hợp để hiển thị trên giao diện."""
     key = _LEVEL_TO_KEY.get(risk_level or "", "low")
     return dict(_PRESENTATIONS[key])
+
+
+def explain_priority_reasons(
+    feature_analysis: list[dict], signal: dict[str, str], out_of_distribution: object = False
+) -> list[str]:
+    """Return short, traceable screening reasons without making a clinical claim.
+
+    The displayed ranges are only the demo's data-review ranges.  They are not
+    treatment thresholds and are always paired with the clinician review step.
+    """
+    reasons: list[str] = []
+    if out_of_distribution:
+        reasons.append("Có giá trị ngoài phạm vi dữ liệu huấn luyện; cần kiểm tra thủ công.")
+
+    for feature in feature_analysis:
+        if feature.get("status") != "danger":
+            continue
+        unit = f" {feature['unit']}" if feature.get("unit") else ""
+        if feature.get("key") == "sofa":
+            reasons.append(
+                f"SOFA có điểm suy cơ quan ({feature['value']}{unit}); cần đối chiếu cùng toàn bộ bối cảnh."
+            )
+        else:
+            reasons.append(
+                f"{feature['label']} {feature['status_text'].lower()} "
+                f"({feature['value']}{unit}); ngưỡng hiển thị demo là "
+                f"{feature['normal_min']}–{feature['normal_max']}."
+            )
+        if len(reasons) >= 3:
+            break
+
+    if not reasons:
+        reasons.append(
+            f"Tổ hợp dữ liệu tạo tín hiệu “{signal['label'].lower()}”; cần đối chiếu toàn bộ hồ sơ."
+        )
+    return reasons
+
+
+def describe_review_outcome(value: str | None) -> str:
+    """Translate optional Pilot feedback into safe, user-facing wording."""
+    return REVIEW_OUTCOME_LABELS.get(value or "", "Chưa ghi nhận đánh giá Pilot")

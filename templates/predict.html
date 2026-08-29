@@ -11,7 +11,7 @@
 </div>
 
 <div class="page-body">
-    <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>Chỉ dùng cho nghiên cứu/demo</strong><span>Hệ thống không đưa khuyến nghị điều trị và không tạo chẩn đoán.</span></div></div>
+    <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>AI hỗ trợ phát hiện tín hiệu để điều phối rà soát</strong><span>Hệ thống không đưa khuyến nghị điều trị, không chẩn đoán và không thay thế bác sĩ.</span></div></div>
     <form method="POST" action="{{ url_for('predictions.predict') }}" id="predict-form">
         <div class="intake-layout">
             <section class="card intake-main">
@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </section>
-            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul></div></aside>
+            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul><div class="time-series-note"><strong>Trạng thái dữ liệu hiện tại</strong><span>Bản demo ghi nhận một thời điểm. Xu hướng 6–12–24 giờ chỉ được phân tích trong Pilot khi có chuỗi dữ liệu hợp lệ.</span></div></div></aside>
         </div>
 
         <section class="card clinical-form-card">

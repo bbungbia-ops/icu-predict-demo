@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Pilot & đo lường - ICU Predict{% endblock %}
+
+{% block content %}
+<div class="page-header workspace-header">
+    <div><div class="eyebrow">PILOT TINH GỌN</div><h1>Đo hiệu quả trước khi mở rộng</h1><div class="breadcrumb">Thử nghiệm có giám sát tại 01 ICU, phạm vi 10–20 giường theo quy trình của đơn vị.</div></div>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline">Quay lại điều phối</a>
+</div>
+
+<div class="page-body">
+    <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>Mục tiêu của Pilot là kiểm chứng quy trình, không phải khẳng định hiệu quả lâm sàng.</strong><span>Chỉ số được hiển thị từ dữ liệu đã ghi nhận; các chỉ số chưa đủ dữ liệu sẽ giữ trạng thái chờ thay vì tạo số liệu minh họa.</span></div></div>
+
+    <section class="pilot-scope-card"><div><span class="eyebrow">PHẠM VI ĐỀ XUẤT</span><h2>01 ICU · 10–20 giường · đội ngũ được phân quyền</h2><p>Bắt đầu bằng quy trình nhập/đồng bộ có kiểm tra dữ liệu, bác sĩ xác nhận từng bản ghi và một buổi tổng kết kết quả cùng đơn vị Pilot.</p></div><ul><li>Không dùng để ra y lệnh</li><li>Không suy diễn khi thiếu dữ liệu</li><li>Có người phụ trách đối soát</li></ul></section>
+
+    <section class="pilot-metric-grid" aria-label="Chỉ số Pilot hiện tại">
+        <article class="pilot-metric"><span>Hoàn tất rà soát</span><strong>{% if completion_rate is not none %}{{ completion_rate }}%{% else %}Chưa có{% endif %}</strong><small>{{ reviewed_records }} / {{ total_records }} bản ghi đã có xác nhận bác sĩ</small></article>
+        <article class="pilot-metric"><span>Thời gian rà soát trung vị</span><strong>{% if median_review_minutes is not none %}{{ median_review_minutes }} phút{% else %}Chưa đủ dữ liệu{% endif %}</strong><small>Tính từ lúc tạo bản ghi đến lúc bác sĩ xác nhận</small></article>
+        <article class="pilot-metric"><span>Tín hiệu chưa phù hợp</span><strong>{{ not_appropriate_records }}</strong><small>Do bác sĩ chủ động ghi nhận trong phản hồi Pilot</small></article>
+        <article class="pilot-metric"><span>Mức hữu ích trung bình</span><strong>{% if average_utility is not none %}{{ average_utility }} / 5{% else %}Chưa đủ dữ liệu{% endif %}</strong><small>{{ scored_records }} bản ghi đã được chấm hữu ích</small></article>
+    </section>
+
+    <section class="card"><div class="card-header"><div><div class="eyebrow">BỘ CHỈ SỐ ĐÁNH GIÁ</div><h3>Đo đúng thứ cần chứng minh</h3></div></div><div class="card-body"><div class="pilot-measurement-list"><div><strong>Thời gian rà soát</strong><p>Đo thời gian từ khi tạo bản ghi đến khi bác sĩ xác nhận; dùng để đánh giá khả năng hỗ trợ điều phối.</p><span class="data-state ready">Thu thập tự động từ audit trail</span></div><div><strong>Tín hiệu chưa phù hợp</strong><p>Bác sĩ có thể ghi nhận tín hiệu chưa phù hợp với bối cảnh thay vì gọi là “cảnh báo sai” khi chưa có tiêu chuẩn đối chiếu thống nhất.</p><span class="data-state neutral">Thu thập khi bác sĩ phản hồi</span></div><div><strong>Mức hữu ích</strong><p>Chấm 1–5 sau khi xác nhận để hiểu hệ thống có giúp ưu tiên công việc hay không.</p><span class="data-state neutral">Thu thập khi bác sĩ phản hồi</span></div><div><strong>Thời gian tiết kiệm</strong><p>So sánh với thời gian rà soát thủ công trước Pilot; cần chốt đường cơ sở cùng đơn vị trước khi kết luận.</p><span class="data-state caution">Cần thu thập baseline trước Pilot</span></div></div></div></section>
+
+    <section class="pilot-next-steps"><div><span class="workflow-step">01</span><strong>Chốt quy trình và dữ liệu</strong><p>Xác nhận người dùng, nguồn thông số, đơn vị đo và thời điểm ghi nhận.</p></div><div><span class="workflow-step">02</span><strong>Chạy Pilot có giám sát</strong><p>Bác sĩ đánh giá bản ghi, lưu nhận định và phản hồi mức hữu ích.</p></div><div><span class="workflow-step">03</span><strong>Tổng kết bằng số liệu</strong><p>Đối chiếu thời gian rà soát, phản hồi tín hiệu và baseline trước khi quyết định mở rộng.</p></div></section>
+</div>
+{% endblock %}

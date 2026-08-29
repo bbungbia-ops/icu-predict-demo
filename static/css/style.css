@@ -1645,3 +1645,454 @@ tr {
         padding: 12px 16px;
     }
 }
+
+/* --- CLINICAL COORDINATION, SAFETY & PILOT --- */
+.coordination-questions,
+.question-grid,
+.pilot-next-steps {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 20px 0;
+}
+
+.coordination-questions > div,
+.question-grid article,
+.pilot-next-steps > div {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.coordination-questions strong,
+.question-grid h3,
+.pilot-next-steps strong {
+    color: var(--gray-800);
+    display: block;
+    font-size: .94rem;
+    line-height: 1.35;
+    margin: 8px 0 5px;
+}
+
+.coordination-questions p,
+.question-grid p,
+.pilot-next-steps p {
+    color: var(--gray-500);
+    font-size: .81rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.priority-reason-list {
+    list-style: none;
+    margin: 0;
+    min-width: 220px;
+    padding: 0;
+}
+
+.priority-reason-list li {
+    color: var(--gray-600);
+    font-size: .76rem;
+    line-height: 1.4;
+    padding: 0 0 7px 15px;
+    position: relative;
+}
+
+.priority-reason-list li:last-child {
+    padding-bottom: 0;
+}
+
+.priority-reason-list li::before {
+    background: var(--primary-500);
+    border-radius: 50%;
+    content: '';
+    height: 5px;
+    left: 0;
+    position: absolute;
+    top: .45rem;
+    width: 5px;
+}
+
+.priority-reason-list.detailed {
+    min-width: 0;
+}
+
+.priority-reason-list.detailed li {
+    font-size: .88rem;
+    padding-bottom: 10px;
+}
+
+.priority-explanation-card,
+.trend-readiness-card {
+    margin-bottom: 20px;
+}
+
+.priority-explanation-note,
+.trend-readiness-copy,
+.trend-readiness-footnote {
+    color: var(--gray-500);
+    font-size: .8rem;
+    line-height: 1.5;
+    margin: 15px 0 0;
+}
+
+.trend-readiness-copy {
+    margin-top: 0;
+}
+
+.trend-readiness-footnote {
+    border-top: 1px solid var(--gray-100);
+    padding-top: 12px;
+}
+
+.trend-window-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 17px;
+}
+
+.trend-window-grid > div {
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 13px;
+}
+
+.trend-window-grid strong,
+.trend-window-grid span {
+    display: block;
+}
+
+.trend-window-grid strong {
+    color: var(--primary-700);
+    font-size: 1rem;
+}
+
+.trend-window-grid span {
+    color: var(--gray-500);
+    font-size: .72rem;
+    line-height: 1.35;
+    margin-top: 4px;
+}
+
+.time-series-note {
+    background: #f8fafc;
+    border-left: 3px solid #94a3b8;
+    border-radius: 0 8px 8px 0;
+    color: var(--gray-600);
+    font-size: .78rem;
+    line-height: 1.45;
+    margin-top: 18px;
+    padding: 11px 12px;
+}
+
+.time-series-note strong,
+.time-series-note span {
+    display: block;
+}
+
+.time-series-note strong {
+    color: var(--gray-700);
+    font-size: .74rem;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+.pilot-feedback-fields {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 14px;
+}
+
+.pilot-feedback-fields .form-group {
+    margin: 0;
+}
+
+.pilot-feedback-fields label span {
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.pilot-feedback-summary {
+    border-top: 1px solid var(--gray-100);
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 16px;
+    padding: 16px 22px 22px;
+}
+
+.pilot-feedback-summary span,
+.pilot-feedback-summary strong {
+    display: block;
+}
+
+.pilot-feedback-summary span {
+    color: var(--gray-500);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.pilot-feedback-summary strong {
+    color: var(--gray-800);
+    font-size: .88rem;
+    line-height: 1.4;
+    margin-top: 5px;
+}
+
+.positioning-hero {
+    background: linear-gradient(135deg, #f0fdfa, #fff);
+    border-color: #b9e7df;
+    margin-bottom: 18px;
+}
+
+.positioning-hero h2 {
+    color: var(--gray-900);
+    font-size: 1.55rem;
+    line-height: 1.28;
+    margin: 7px 0 9px;
+    max-width: 800px;
+}
+
+.positioning-hero p,
+.trend-roadmap-card p {
+    color: var(--gray-600);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 860px;
+}
+
+.question-grid article > span {
+    color: var(--primary-600);
+    font-size: .75rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.safety-layout {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 20px;
+}
+
+.safety-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding-left: 22px;
+}
+
+.safety-list li {
+    color: var(--gray-600);
+    font-size: .84rem;
+    line-height: 1.5;
+    padding-left: 3px;
+}
+
+.safety-list strong,
+.transparency-grid strong {
+    color: var(--gray-800);
+}
+
+.transparency-card {
+    margin-bottom: 20px;
+}
+
+.transparency-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.transparency-grid > div {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.transparency-grid ul {
+    color: var(--gray-600);
+    font-size: .82rem;
+    line-height: 1.55;
+    margin: 9px 0 0;
+    padding-left: 18px;
+}
+
+.pilot-scope-card {
+    align-items: center;
+    background: #172033;
+    border-radius: 14px;
+    color: #e2e8f0;
+    display: grid;
+    gap: 28px;
+    grid-template-columns: 1.3fr .7fr;
+    margin: 20px 0;
+    padding: 24px 26px;
+}
+
+.pilot-scope-card .eyebrow {
+    color: #5eead4;
+}
+
+.pilot-scope-card h2 {
+    color: #fff;
+    font-size: 1.25rem;
+    line-height: 1.35;
+    margin: 6px 0 8px;
+}
+
+.pilot-scope-card p {
+    color: #cbd5e1;
+    font-size: .84rem;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.pilot-scope-card ul {
+    color: #d1fae5;
+    font-size: .82rem;
+    font-weight: 650;
+    line-height: 1.8;
+    margin: 0;
+    padding-left: 18px;
+}
+
+.pilot-metric-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 20px 0;
+}
+
+.pilot-metric {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    min-width: 0;
+    padding: 18px;
+}
+
+.pilot-metric span,
+.pilot-metric strong,
+.pilot-metric small {
+    display: block;
+}
+
+.pilot-metric span,
+.pilot-metric small {
+    color: var(--gray-500);
+    font-size: .73rem;
+    line-height: 1.4;
+}
+
+.pilot-metric strong {
+    color: var(--gray-900);
+    font-size: 1.25rem;
+    line-height: 1.25;
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+
+.pilot-measurement-list {
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pilot-measurement-list > div {
+    border-bottom: 1px solid var(--gray-100);
+    padding: 18px 20px 18px 0;
+}
+
+.pilot-measurement-list > div:nth-child(odd) {
+    border-right: 1px solid var(--gray-100);
+    padding-right: 20px;
+}
+
+.pilot-measurement-list > div:nth-child(even) {
+    padding-left: 20px;
+}
+
+.pilot-measurement-list > div:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
+
+.pilot-measurement-list strong {
+    color: var(--gray-800);
+    display: block;
+    font-size: .9rem;
+}
+
+.pilot-measurement-list p {
+    color: var(--gray-500);
+    font-size: .8rem;
+    line-height: 1.5;
+    margin: 6px 0 10px;
+}
+
+@media (max-width: 900px) {
+    .coordination-questions,
+    .question-grid,
+    .pilot-next-steps,
+    .pilot-metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .safety-layout,
+    .pilot-scope-card {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .coordination-questions,
+    .question-grid,
+    .pilot-next-steps,
+    .pilot-metric-grid,
+    .safety-layout,
+    .transparency-grid,
+    .pilot-feedback-fields,
+    .pilot-feedback-summary,
+    .pilot-measurement-list {
+        grid-template-columns: 1fr;
+    }
+
+    .priority-reason-list {
+        min-width: 250px;
+    }
+
+    .priority-reason-list.detailed {
+        min-width: 0;
+    }
+
+    .trend-window-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .positioning-hero h2 {
+        font-size: 1.25rem;
+    }
+
+    .pilot-scope-card {
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .pilot-measurement-list > div,
+    .pilot-measurement-list > div:nth-child(odd),
+    .pilot-measurement-list > div:nth-child(even) {
+        border-bottom: 1px solid var(--gray-100);
+        border-right: 0;
+        padding: 16px 0;
+    }
+
+    .pilot-measurement-list > div:last-child {
+        border-bottom: 0;
+    }
+}

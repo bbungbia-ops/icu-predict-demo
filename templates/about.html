@@ -4,21 +4,31 @@
 {% block content %}
 <div class="page-header workspace-header">
     <div>
-        <div class="eyebrow">GIỚI THIỆU NỀN TẢNG</div>
+        <div class="eyebrow">ĐỊNH VỊ NỀN TẢNG</div>
         <h1>ICU Predict</h1>
-        <div class="breadcrumb">Nền tảng hỗ trợ quy trình đánh giá lâm sàng trong môi trường ICU.</div>
+        <div class="breadcrumb">Nền tảng hỗ trợ điều phối và ưu tiên rà soát lâm sàng trong ICU.</div>
     </div>
+    <a href="{{ url_for('dashboard.pilot') }}" class="btn btn-outline">Xem kế hoạch Pilot</a>
 </div>
 
 <div class="page-body">
-    <div class="research-banner"><div class="research-banner-icon">i</div><div><strong>Phiên bản nghiên cứu/demo</strong><span>Hệ thống giúp tổ chức thông tin và lưu dấu vết đánh giá; không thay thế bác sĩ, chẩn đoán hoặc y lệnh.</span></div></div>
-    <div class="card mb-3"><div class="card-body" style="text-align:center; padding:42px 32px;"><div class="brand-icon" style="width:72px; height:72px; margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><h2 style="font-size:1.65rem; margin-bottom:10px;">Biến dữ liệu rời rạc thành một quy trình có trách nhiệm</h2><p style="max-width:720px; margin:0 auto; color:var(--gray-500); line-height:1.6;">ICU Predict tạo bản ghi nghiên cứu từ các thông số lâm sàng, giúp đội ngũ ưu tiên việc rà soát và lưu nhận định của bác sĩ trong nhật ký kiểm toán.</p></div></div>
+    <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>Không thay thế bác sĩ</strong><span>AI chỉ hỗ trợ nhận diện tín hiệu cần chú ý sớm. Bác sĩ đối chiếu bối cảnh, xác nhận đánh giá và đưa ra mọi quyết định chuyên môn.</span></div></div>
 
-    <div class="workflow-panel mb-3"><div><span class="workflow-step">01</span><strong>Ghi nhận thông số</strong><p>Sáu thông số thô được nhập cùng với SOFA làm ngữ cảnh.</p></div><div><span class="workflow-step">02</span><strong>Kiểm tra dữ liệu</strong><p>Hệ thống kiểm tra giới hạn nhập và gắn cờ dữ liệu ngoài phạm vi demo.</p></div><div><span class="workflow-step">03</span><strong>Bác sĩ xác nhận</strong><p>Bản ghi đi vào hàng đợi và được lưu nhận định sau khi đánh giá.</p></div></div>
+    <section class="positioning-hero card">
+        <div class="card-body"><div class="eyebrow">GIÁ TRỊ CỐT LÕI</div><h2>Đưa đúng bản ghi đến đúng người rà soát, kèm lý do và dấu vết xác nhận.</h2><p>ICU Predict không công bố chẩn đoán hay dự báo lâm sàng. Hệ thống tổ chức dữ liệu, làm rõ tín hiệu cần đối chiếu và lưu nhận định để đội ICU điều phối công việc minh bạch hơn.</p></div>
+    </section>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-        <section class="card"><div class="card-header"><h3>Công nghệ sử dụng</h3></div><div class="card-body"><table style="width:100%;"><tr><td style="padding:8px 0; font-weight:600;">Mô hình nghiên cứu</td><td>Scikit-learn + Logistic Regression</td></tr><tr><td style="padding:8px 0; font-weight:600;">Nền tảng</td><td>Python Flask</td></tr><tr><td style="padding:8px 0; font-weight:600;">Giao diện</td><td>HTML, CSS, JavaScript</td></tr><tr><td style="padding:8px 0; font-weight:600;">Dữ liệu</td><td>SQLite trong bản demo</td></tr></table></div></section>
-        <section class="card"><div class="card-header"><h3>Thông số hiển thị</h3></div><div class="card-body"><table style="width:100%;"><tr><td style="padding:8px 0; font-weight:600;">SOFA</td><td>Điểm tổng hợp suy cơ quan</td></tr><tr><td style="padding:8px 0; font-weight:600;">MAP</td><td>Huyết áp động mạch trung bình</td></tr><tr><td style="padding:8px 0; font-weight:600;">PaO₂/FiO₂</td><td>Chỉ số oxy hóa máu</td></tr><tr><td style="padding:8px 0; font-weight:600;">GCS</td><td>Mức độ ý thức Glasgow</td></tr></table></div></section>
-    </div>
+    <section class="question-grid" aria-label="Ba câu hỏi ICU Predict giải quyết">
+        <article><span>01</span><h3>Bệnh nhân nào cần xem trước?</h3><p>Hàng đợi ưu tiên giúp tập trung các bản ghi cần bác sĩ rà soát theo quy trình đơn vị.</p></article>
+        <article><span>02</span><h3>Vì sao cần ưu tiên?</h3><p>Lý do gắn với trạng thái dữ liệu, ngưỡng hiển thị demo và tín hiệu của mô hình nghiên cứu.</p></article>
+        <article><span>03</span><h3>Đã được rà soát chưa?</h3><p>Xác nhận và nhận định của bác sĩ được lưu trong nhật ký kiểm toán có thể truy xuất.</p></article>
+    </section>
+
+    <section class="safety-layout">
+        <article class="card"><div class="card-header"><div><div class="eyebrow">THIẾT KẾ AN TOÀN</div><h3>Năm lớp kiểm soát</h3></div></div><div class="card-body"><ol class="safety-list"><li><strong>Ngưỡng hiển thị:</strong> hỗ trợ rà soát dữ liệu, không phải ngưỡng điều trị.</li><li><strong>Tín hiệu AI:</strong> chỉ dùng để sắp xếp ưu tiên trong môi trường nghiên cứu.</li><li><strong>Cảnh báo dữ liệu:</strong> nêu rõ dữ liệu thiếu hoặc ngoài phạm vi huấn luyện.</li><li><strong>Xác nhận bác sĩ:</strong> yêu cầu ghi nhận nhận định trước khi hoàn tất bản ghi.</li><li><strong>Audit trail:</strong> lưu thời gian, người xác nhận và nội dung đánh giá.</li></ol></div></article>
+        <article class="card trend-roadmap-card"><div class="card-header"><div><div class="eyebrow">NÂNG CHẤT LƯỢNG MÔ HÌNH</div><h3>Từ một thời điểm đến xu hướng 6–12–24 giờ</h3></div></div><div class="card-body"><p>Phiên bản demo hiện dùng thông số tại một thời điểm. Trong Pilot, mục tiêu là kiểm tra khả năng tiếp nhận chuỗi dữ liệu hợp lệ trước khi hiển thị biến động theo thời gian.</p><div class="trend-window-grid"><div><strong>06 giờ</strong><span>Thu thập liên tiếp</span></div><div><strong>12 giờ</strong><span>Đối chiếu biến động</span></div><div><strong>24 giờ</strong><span>Rà soát diễn biến</span></div></div><p class="trend-readiness-footnote">Không diễn giải xu hướng khi chưa xác nhận nguồn dữ liệu, đơn vị đo và độ đầy đủ của chuỗi.</p></div></article>
+    </section>
+
+    <section class="card transparency-card"><div class="card-header"><div><div class="eyebrow">MINH BẠCH TRONG DEMO</div><h3>Điều hệ thống có và không có</h3></div></div><div class="card-body"><div class="transparency-grid"><div><strong>Có trong bản demo</strong><ul><li>Điều phối hàng đợi rà soát</li><li>Lý do ưu tiên có thể truy xuất</li><li>Xác nhận bác sĩ và nhật ký kiểm toán</li><li>Cảnh báo phạm vi dữ liệu</li></ul></div><div><strong>Chưa tuyên bố trong bản demo</strong><ul><li>Chẩn đoán hoặc y lệnh</li><li>Dự báo biến cố hay xác suất lâm sàng</li><li>Phân tích xu hướng chưa có chuỗi dữ liệu</li><li>Hiệu quả lâm sàng chưa qua Pilot</li></ul></div></div></div></section>
 </div>
 {% endblock %}

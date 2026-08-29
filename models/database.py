@@ -182,6 +182,8 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
             acknowledged_at TIMESTAMP,
             acknowledged_by INTEGER,
             acknowledgement_note TEXT,
+            review_outcome TEXT,
+            utility_score INTEGER,
             FOREIGN KEY (patient_id) REFERENCES patients(id),
             FOREIGN KEY (predicted_by) REFERENCES users(id),
             FOREIGN KEY (acknowledged_by) REFERENCES users(id)
@@ -199,6 +201,8 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
         'acknowledged_at': 'TIMESTAMP',
         'acknowledged_by': 'INTEGER',
         'acknowledgement_note': 'TEXT',
+        'review_outcome': 'TEXT',
+        'utility_score': 'INTEGER',
     }
     for column, definition in migration_columns.items():
         if column not in prediction_columns:

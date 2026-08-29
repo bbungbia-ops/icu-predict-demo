@@ -28,7 +28,7 @@
                     </div>
                     <div>
                         <h2>ICU Predict</h2>
-                        <span>Nguyên mẫu quy trình nghiên cứu</span>
+                        <span>Điều phối ưu tiên rà soát lâm sàng</span>
                     </div>
                 </div>
             </div>
@@ -81,6 +81,10 @@
                     <a href="{{ url_for('account.subscription') }}" class="nav-item {% if request.endpoint and request.endpoint.startswith('account.') %}active{% endif %}" id="nav-subscription">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h2"/></svg>
                         Tài khoản & gói dịch vụ
+                    </a>
+                    <a href="{{ url_for('dashboard.pilot') }}" class="nav-item {% if request.endpoint == 'dashboard.pilot' %}active{% endif %}" id="nav-pilot">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 3-3 3 2 5-6"/></svg>
+                        Pilot & đo lường
                     </a>
                 </div>
             </nav>

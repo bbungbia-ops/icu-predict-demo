@@ -39,8 +39,9 @@ class ClinicalWorkflowTests(unittest.TestCase):
         response = self.client.get("/dashboard")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Danh sách ưu tiên cần bác sĩ xem xét".encode(), response.data)
-        self.assertIn("Chế độ nghiên cứu".encode(), response.data)
+        self.assertIn("AI chỉ hỗ trợ nhận diện tín hiệu cần chú ý sớm".encode(), response.data)
         self.assertIn("Ưu tiên đánh giá".encode(), response.data)
+        self.assertIn("Vì sao cần xem trước".encode(), response.data)
 
     def test_customer_layout_includes_mobile_navigation_and_table_hint(self):
         response = self.client.get("/dashboard")
@@ -58,19 +59,47 @@ class ClinicalWorkflowTests(unittest.TestCase):
     def test_acknowledgement_writes_audit_trail(self):
         response = self.client.post(
             "/predict/result/2/acknowledge",
-            data={"acknowledgement_note": "Đã đối chiếu hồ sơ trong môi trường kiểm thử."},
+            data={
+                "acknowledgement_note": "Đã đối chiếu hồ sơ trong môi trường kiểm thử.",
+                "review_outcome": "appropriate",
+                "utility_score": "4",
+            },
             follow_redirects=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Đã có bác sĩ đánh giá".encode(), response.data)
+        self.assertIn("Tín hiệu hỗ trợ ưu tiên phù hợp".encode(), response.data)
 
         conn = get_db_connection(self.db_path)
         record = conn.execute(
-            "SELECT acknowledged_at, acknowledged_by, acknowledgement_note FROM predictions WHERE id = 2"
+            "SELECT acknowledged_at, acknowledged_by, acknowledgement_note, review_outcome, utility_score "
+            "FROM predictions WHERE id = 2"
         ).fetchone()
         conn.close()
         self.assertIsNotNone(record["acknowledged_at"])
         self.assertEqual(record["acknowledgement_note"], "Đã đối chiếu hồ sơ trong môi trường kiểm thử.")
+        self.assertEqual(record["review_outcome"], "appropriate")
+        self.assertEqual(record["utility_score"], 4)
+
+    def test_pilot_page_shows_measures_without_invented_results(self):
+        response = self.client.get("/pilot")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("01 ICU · 10–20 giường".encode(), response.data)
+        self.assertIn("Thời gian tiết kiệm".encode(), response.data)
+        self.assertIn("Cần thu thập baseline trước Pilot".encode(), response.data)
+
+    def test_about_page_sets_safe_coordination_positioning(self):
+        response = self.client.get("/about")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Không thay thế bác sĩ".encode(), response.data)
+        self.assertIn("Đã được rà soát chưa?".encode(), response.data)
+
+    def test_result_explains_priority_and_marks_trend_as_not_ready(self):
+        response = self.client.get("/predict/result/4")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("VÌ SAO CẦN XEM TRƯỚC?".encode(), response.data)
+        self.assertIn("Khung theo dõi 6–12–24 giờ".encode(), response.data)
+        self.assertIn("Chưa đủ chuỗi thời gian".encode(), response.data)
 
     def test_pdf_is_a_research_summary_not_treatment_advice(self):
         response = self.client.get("/report/2")

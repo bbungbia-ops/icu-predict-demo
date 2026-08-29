@@ -2,7 +2,12 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from routes.auth import login_required
 from models.database import get_db_connection
 from models.ml_model import InputValidationError
-from models.signal_presentation import describe_signal
+from models.signal_presentation import (
+    REVIEW_OUTCOME_LABELS,
+    describe_review_outcome,
+    describe_signal,
+    explain_priority_reasons,
+)
 import json
 
 predictions_bp = Blueprint('predictions', __name__)
@@ -102,6 +107,10 @@ def result(prediction_id):
     return render_template('result.html',
         prediction=prediction,
         analysis=analysis,
+        priority_reasons=explain_priority_reasons(
+            analysis['feature_analysis'], analysis['signal'], prediction['out_of_distribution']
+        ),
+        review_outcome_label=describe_review_outcome(prediction['review_outcome']),
         analysis_json=json.dumps(analysis)
     )
 
@@ -110,11 +119,23 @@ def result(prediction_id):
 @login_required
 def acknowledge(prediction_id):
     acknowledgement_note = request.form.get('acknowledgement_note', '').strip()
+    review_outcome = request.form.get('review_outcome', '').strip() or None
+    utility_score_text = request.form.get('utility_score', '').strip()
     if not acknowledgement_note:
         flash('Vui lòng ghi lại nhận định của bác sĩ trước khi xác nhận.', 'error')
         return redirect(url_for('predictions.result', prediction_id=prediction_id))
     if len(acknowledgement_note) > 2000:
         flash('Ghi chú đánh giá không được quá 2.000 ký tự.', 'error')
+        return redirect(url_for('predictions.result', prediction_id=prediction_id))
+    if review_outcome and review_outcome not in REVIEW_OUTCOME_LABELS:
+        flash('Đánh giá Pilot không hợp lệ.', 'error')
+        return redirect(url_for('predictions.result', prediction_id=prediction_id))
+    try:
+        utility_score = int(utility_score_text) if utility_score_text else None
+    except ValueError:
+        utility_score = None
+    if utility_score is not None and utility_score not in range(1, 6):
+        flash('Mức hữu ích Pilot cần nằm trong khoảng 1 đến 5.', 'error')
         return redirect(url_for('predictions.result', prediction_id=prediction_id))
 
     db_path = current_app.config['DATABASE_PATH']
@@ -123,9 +144,11 @@ def acknowledge(prediction_id):
         '''UPDATE predictions
            SET acknowledged_at = CURRENT_TIMESTAMP,
                acknowledged_by = ?,
-               acknowledgement_note = ?
+               acknowledgement_note = ?,
+               review_outcome = ?,
+               utility_score = ?
            WHERE id = ? AND acknowledged_at IS NULL''',
-        (session.get('user_id'), acknowledgement_note, prediction_id),
+        (session.get('user_id'), acknowledgement_note, review_outcome, utility_score, prediction_id),
     )
     conn.commit()
     conn.close()
