@@ -5,7 +5,8 @@ from flask import Blueprint, current_app, render_template, request, redirect, ur
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 from models.database import create_organization_account, get_db_connection
-from models.license_client import validate_icu_license
+from models.license_client import LicenseCheckResult, validate_icu_license
+from license_admin.database import expire_due_licenses, get_connection as get_license_connection, get_order
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -56,28 +57,49 @@ def establish_session(user, license_check):
     get_csrf_token()
 
 
+def resolve_local_order_license(user):
+    """Keep a local development login aligned with the shared order store.
+
+    Production validates through the signed license endpoint. In the local demo
+    that endpoint is deliberately optional, so a paid order still restores the
+    correct account state after the customer signs in again.
+    """
+    order_id = user['organization_license_order_id']
+    if not order_id:
+        return LicenseCheckResult(valid=False, reason='not_found')
+    try:
+        connection = get_license_connection(current_app.config['LICENSE_ADMIN_DATABASE_PATH'])
+        try:
+            expire_due_licenses(connection)
+            order = get_order(connection, order_id)
+        finally:
+            connection.close()
+    except Exception:
+        return LicenseCheckResult(valid=False, reason='validation_unavailable')
+    if order and order['license_status'] == 'active':
+        return LicenseCheckResult(
+            valid=True,
+            reason='local_order_active',
+            plan_code=order['plan_code'],
+            expires_at=order['expires_at'],
+        )
+    return LicenseCheckResult(valid=False, reason='pending_payment')
+
+
 @auth_bp.before_app_request
 def keep_unlicensed_accounts_in_commercial_flow():
-    """In an enforced deployment, pending customers may only manage their order.
+    """Leave read access open while route-level trial limits protect new users.
 
-    This keeps a newly registered organization out of clinical screens until its
-    license has been activated, while still allowing it to complete checkout.
-    The local demo keeps its former open behavior unless enforcement is enabled.
+    A newly registered organization can see its empty workspace and evaluate a
+    small number of self-entered trial cases. Creating additional cases or
+    assessments is guarded in the relevant route, where the organization-wide
+    counter is available. System administrators are never license-gated.
     """
     if not current_app.config.get('LICENSE_ENFORCEMENT_ENABLED'):
         return None
-    if not session.get('user_id') or session.get('license_valid'):
+    if not session.get('user_id') or session.get('license_valid') or session.get('role') == 'admin':
         return None
-    endpoint = request.endpoint or ''
-    permitted = {
-        'auth.login', 'auth.logout', 'auth.register',
-        'account.subscription', 'account.purchase_plan', 'account.customer_order',
-        'static',
-    }
-    if endpoint in permitted or endpoint.startswith('static'):
-        return None
-    flash('Tài khoản tổ chức cần có license đang hoạt động trước khi sử dụng các màn hình lâm sàng.', 'error')
-    return redirect(url_for('account.subscription'))
+    return None
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -93,7 +115,8 @@ def login():
         conn = get_db_connection(db_path)
         user = conn.execute(
             '''SELECT u.*, o.name AS organization_name, o.organization_code,
-                      o.license_key AS organization_license_key
+                      o.license_key AS organization_license_key,
+                      o.license_order_id AS organization_license_order_id
                FROM users u
                LEFT JOIN organizations o ON o.id = u.organization_id
                WHERE u.username = ?''',
@@ -106,7 +129,9 @@ def login():
                 current_app.config,
                 license_key=user['organization_license_key'],
             )
-            if not license_check.valid:
+            if not current_app.config['LICENSE_ENFORCEMENT_ENABLED'] and user['role'] != 'admin':
+                license_check = resolve_local_order_license(user)
+            if not license_check.valid and user['role'] != 'admin':
                 messages = {
                     'configuration_missing': 'Hệ thống chưa được cấu hình license hợp lệ. Vui lòng liên hệ quản trị viên.',
                     'validation_unavailable': 'Không thể kiểm tra license lúc này. Vui lòng thử lại hoặc liên hệ quản trị viên.',
@@ -118,13 +143,16 @@ def login():
                     'invalid_response': 'Dịch vụ license trả về dữ liệu không hợp lệ. Vui lòng liên hệ quản trị viên.',
                 }
                 message = messages.get(license_check.reason, 'License không hợp lệ. Vui lòng liên hệ quản trị viên.')
-                # A customer with an organization must still be able to see a
-                # pending order or buy its first key.  The global guard above
-                # limits this session to commercial screens until activation.
+                # A customer starts in an empty workspace and can self-enter
+                # limited trial cases before purchasing a key.
                 if user['organization_id']:
                     establish_session(user, license_check)
-                    flash(f'{message} Bạn vẫn có thể xem và hoàn tất đơn hàng của tổ chức.', 'error')
-                    return redirect(url_for('account.subscription'))
+                    flash(
+                        f'{message} Bạn có thể dùng thử tối đa '
+                        f"{current_app.config['TRIAL_PATIENT_LIMIT']} ca tự nhập trước khi mua key.",
+                        'info',
+                    )
+                    return redirect(url_for('dashboard.index'))
                 flash(message, 'error')
                 return render_template('login.html')
             establish_session(user, license_check)
@@ -189,8 +217,12 @@ def register():
                 session['license_plan'] = None
                 session['license_expires_at'] = None
                 get_csrf_token()
-                flash('Đã tạo tài khoản tổ chức. Hãy chọn gói để tạo đơn hàng và nhận hướng dẫn thanh toán.', 'success')
-                return redirect(url_for('account.subscription'))
+                flash(
+                    f"Đã tạo tài khoản tổ chức với dữ liệu trống. Bạn có thể tự nhập tối đa "
+                    f"{current_app.config['TRIAL_PATIENT_LIMIT']} ca để dùng thử trước khi mua key.",
+                    'success',
+                )
+                return redirect(url_for('dashboard.index'))
 
     return render_template('register.html')
 

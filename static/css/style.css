@@ -1331,6 +1331,16 @@ tr {
 .clinical-form-card { margin-bottom: 20px; }.sofa-context { background: #f8fafc; border: 1px dashed var(--gray-300); border-radius: 10px; padding: 14px; }
 .sofa-context .form-control { background: white; }.intake-actions { display: flex; gap: 12px; justify-content: flex-end; padding-bottom: 20px; }
 
+/* --- ORGANIZATION TRIAL & ADAPTIVE REVIEW QUEUE --- */
+.trial-usage-banner { align-items: center; background: #effcf8; border: 1px solid #99e3d3; border-radius: 12px; color: #075e54; display: flex; gap: 12px; margin: 0 0 18px; padding: 13px 15px; }
+.trial-usage-banner.is-exhausted { background: #fff8eb; border-color: #f5c76d; color: #8a4b06; }
+.trial-usage-icon { align-items: center; background: #0f9e8a; border-radius: 50%; color: #fff; display: inline-flex; flex: 0 0 24px; font-size: .83rem; font-weight: 800; height: 24px; justify-content: center; }
+.trial-usage-banner.is-exhausted .trial-usage-icon { background: #e58a00; }
+.trial-usage-copy { min-width: 0; flex: 1; }.trial-usage-copy strong, .trial-usage-copy span { display: block; }.trial-usage-copy strong { font-size: .84rem; margin-bottom: 2px; }.trial-usage-copy span { font-size: .76rem; line-height: 1.45; }
+.trial-usage-banner .btn { flex: 0 0 auto; background: rgba(255,255,255,.62); }
+.priority-queue-card-list { display: none; }
+.patient-detail-layout { display: grid; gap: 24px; grid-template-columns: minmax(250px, 1fr) minmax(0, 2fr); }
+
 /* --- SUBSCRIPTION & COMMERCIAL --- */
 .subscription-hero { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 28px; border-radius: 14px; color: white; background: linear-gradient(120deg, #0f2e40, #087d70); box-shadow: 0 14px 30px rgba(8, 125, 112, 0.16); }
 .subscription-identity { display: flex; align-items: center; gap: 15px; }.subscription-mark { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid rgba(255,255,255,.3); border-radius: 12px; background: rgba(255,255,255,.13); font-size: 1.25rem; font-weight: 800; }
@@ -1353,12 +1363,38 @@ tr {
     .checkout-grid { grid-template-columns: 1fr; }
 }
 
+/* At tablet widths the seven-column clinical queue becomes hard to scan even
+   if it technically fits. A structured card preserves each reason and action
+   without forcing the user to pan across a dense table. */
+@media (max-width: 1260px) {
+    .priority-card .table-container,
+    .priority-card .priority-table-hint {
+        display: none;
+    }
+
+    .priority-card .priority-queue-card-list {
+        display: grid;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .priority-queue-item { background: #fff; border: 1px solid var(--gray-200); border-left: 4px solid #12b76a; border-radius: 11px; padding: 15px; }
+    .priority-queue-item.signal-high { border-left-color: #f04438; }.priority-queue-item.signal-medium { border-left-color: #f79009; }
+    .priority-queue-topline, .priority-queue-footer, .priority-queue-meta { display: flex; gap: 12px; justify-content: space-between; }
+    .priority-queue-topline { align-items: flex-start; }.priority-queue-topline > div { min-width: 0; }.priority-queue-topline strong, .priority-queue-topline span { display: block; }.priority-queue-topline strong { color: var(--gray-900); font-size: .95rem; }.priority-queue-topline > div > span { color: var(--gray-500); font-size: .78rem; margin-top: 2px; }
+    .priority-queue-meta { border-bottom: 1px solid var(--gray-100); color: var(--gray-500); font-size: .73rem; margin-top: 10px; padding-bottom: 10px; }
+    .priority-queue-meta span:last-child { text-align: right; }
+    .priority-queue-reasons { margin-top: 11px; }.priority-queue-reasons > span { color: var(--gray-700); display: block; font-size: .73rem; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
+    .priority-queue-reasons .priority-reason-list { margin: 7px 0 0; }.priority-queue-footer { align-items: center; border-top: 1px solid var(--gray-100); margin-top: 12px; padding-top: 12px; }
+}
+
 @media (max-width: 900px) {
     .workflow-panel, .assessment-facts { grid-template-columns: 1fr; }
     .assessment-layout, .intake-layout { grid-template-columns: 1fr; }
     .checkout-grid { grid-template-columns: 1fr; }
     .checkout-payment-body { grid-template-columns: minmax(0, 1fr) 220px; }
     .plan-grid { grid-template-columns: repeat(2, 1fr); }.subscription-facts { grid-template-columns: 1fr; }.commercial-note-card { grid-template-columns: 1fr; }
+    .patient-detail-layout { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
     .workspace-header { align-items: flex-start; gap: 16px; }
@@ -1367,6 +1403,8 @@ tr {
     .intake-actions .btn { justify-content: center; }
     .page-header { align-items: flex-start; flex-direction: column; padding: 16px; position: static; }.workspace-header .btn { width: 100%; justify-content: center; }.checkout-grid { gap: 14px; margin-top: 14px; }.checkout-payment-card .card-header { padding: 18px; }.checkout-payment-body { grid-template-columns: 1fr; gap: 0; padding: 0 18px 18px; }.checkout-order-card { padding: 18px; }.checkout-details > div, .checkout-key { align-items: flex-start; flex-direction: column; gap: 6px; }.checkout-details dd { text-align: left; }.checkout-qr { justify-self: stretch; margin-top: 16px; }.checkout-qr img { width: min(210px, 100%); }.checkout-qr figcaption { text-align: center; }.checkout-note { margin-top: 14px; padding: 18px; }
     .subscription-hero, .section-title-row { align-items: flex-start; flex-direction: column; }.subscription-status { text-align: left; }.plan-grid { grid-template-columns: 1fr; }
+    .trial-usage-banner { align-items: flex-start; flex-wrap: wrap; }.trial-usage-banner .btn { margin-left: 36px; width: calc(100% - 36px); justify-content: center; }
+    .priority-queue-item { padding: 13px; }.priority-queue-topline, .priority-queue-footer { align-items: flex-start; flex-direction: column; }.priority-queue-topline .signal-badge { display: inline-flex; }.priority-queue-footer .btn { justify-content: center; width: 100%; }.priority-queue-meta { align-items: flex-start; flex-direction: column; gap: 4px; }.priority-queue-meta span:last-child { text-align: left; }
 }
 
 /* --- MOBILE EXPERIENCE POLISH --- */

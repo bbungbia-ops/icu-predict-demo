@@ -1,10 +1,11 @@
 from datetime import datetime
 from statistics import median
 
-from flask import Blueprint, render_template, current_app
+from flask import Blueprint, render_template, current_app, session
 from routes.auth import login_required
 from models.database import get_db_connection
 from models.signal_presentation import describe_signal, explain_priority_reasons
+from models.trial_access import get_trial_status
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -15,23 +16,30 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def index():
     db_path = current_app.config['DATABASE_PATH']
     conn = get_db_connection(db_path)
+    organization_id = session.get('organization_id')
 
     # Stats
-    total_patients = conn.execute("SELECT COUNT(*) FROM patients WHERE status = 'active'").fetchone()[0]
+    total_patients = conn.execute(
+        "SELECT COUNT(*) FROM patients WHERE status = 'active' AND organization_id = ?",
+        (organization_id,),
+    ).fetchone()[0]
     review_items = conn.execute('''
         SELECT pr.id, p.name, p.patient_code, p.ward, pr.risk_level, pr.predicted_at,
                pr.out_of_distribution, pr.model_version, pr.sofa, pr.map_value,
                pr.pao2_fio2, pr.bilirubin, pr.creatinine, pr.platelet, pr.gcs
         FROM predictions pr
         JOIN patients p ON pr.patient_id = p.id
-        WHERE pr.id IN (
-            SELECT MAX(id) FROM predictions WHERE patient_id IS NOT NULL GROUP BY patient_id
+        WHERE pr.organization_id = ?
+          AND pr.id IN (
+            SELECT MAX(id) FROM predictions
+            WHERE patient_id IS NOT NULL AND organization_id = ?
+            GROUP BY patient_id
         )
           AND pr.risk_level IN ('Cao', 'Trung bình', 'Trung binh')
           AND pr.acknowledged_at IS NULL
         ORDER BY CASE pr.risk_level WHEN 'Cao' THEN 0 ELSE 1 END, pr.predicted_at DESC
         LIMIT 10
-    ''').fetchall()
+    ''', (organization_id, organization_id)).fetchall()
     predictor = current_app.config['PREDICTOR']
     review_queue = []
     for item in review_items:
@@ -47,9 +55,18 @@ def index():
         review_queue.append(item_data)
     pending_review = len(review_queue)
     acknowledged_today = conn.execute(
-        "SELECT COUNT(*) FROM predictions WHERE DATE(acknowledged_at) = CURRENT_DATE"
+        "SELECT COUNT(*) FROM predictions WHERE organization_id = ? AND DATE(acknowledged_at) = CURRENT_DATE",
+        (organization_id,),
     ).fetchone()[0]
     latest_model = current_app.config['PREDICTOR'].metadata['model_version']
+    trial_status = get_trial_status(
+        conn,
+        organization_id,
+        role=session.get('role'),
+        license_valid=session.get('license_valid', False),
+        patient_limit=current_app.config['TRIAL_PATIENT_LIMIT'],
+        assessment_limit=current_app.config['TRIAL_ASSESSMENT_LIMIT'],
+    )
 
     conn.close()
 
@@ -59,6 +76,7 @@ def index():
         acknowledged_today=acknowledged_today,
         review_queue=review_queue,
         latest_model=latest_model,
+        trial_status=trial_status,
     )
 
 
@@ -84,6 +102,7 @@ def _as_datetime(value):
 def pilot():
     """Show only observable Pilot measures; unavailable evidence stays explicit."""
     conn = get_db_connection(current_app.config['DATABASE_PATH'])
+    organization_id = session.get('organization_id')
     totals = conn.execute('''
         SELECT
             COUNT(*) AS total_records,
@@ -91,12 +110,15 @@ def pilot():
             SUM(CASE WHEN review_outcome = 'not_appropriate' THEN 1 ELSE 0 END) AS not_appropriate_records,
             SUM(CASE WHEN utility_score IS NOT NULL THEN 1 ELSE 0 END) AS scored_records
         FROM predictions
-    ''').fetchone()
+        WHERE organization_id = ?
+    ''', (organization_id,)).fetchone()
     review_times = conn.execute(
-        'SELECT predicted_at, acknowledged_at FROM predictions WHERE acknowledged_at IS NOT NULL'
+        'SELECT predicted_at, acknowledged_at FROM predictions WHERE organization_id = ? AND acknowledged_at IS NOT NULL',
+        (organization_id,),
     ).fetchall()
     utility_scores = conn.execute(
-        'SELECT utility_score FROM predictions WHERE utility_score BETWEEN 1 AND 5'
+        'SELECT utility_score FROM predictions WHERE organization_id = ? AND utility_score BETWEEN 1 AND 5',
+        (organization_id,),
     ).fetchall()
     conn.close()
 

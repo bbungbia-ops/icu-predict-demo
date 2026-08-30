@@ -28,7 +28,7 @@ class LicenseEnforcementTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
-    def test_login_is_blocked_when_license_is_invalid(self):
+    def test_system_admin_bypasses_invalid_license(self):
         with patch(
             "routes.auth.validate_icu_license",
             return_value=LicenseCheckResult(valid=False, reason="expired"),
@@ -36,10 +36,11 @@ class LicenseEnforcementTests(unittest.TestCase):
             response = self.client.post(
                 "/login",
                 data={"username": Config.ADMIN_USERNAME, "password": Config.ADMIN_PASSWORD},
-                follow_redirects=True,
             )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("License ICU Predict đã hết hạn".encode(), response.data)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/dashboard", response.location)
+        dashboard = self.client.get("/dashboard")
+        self.assertEqual(dashboard.status_code, 200)
 
     def test_login_succeeds_when_license_is_valid(self):
         with patch(
@@ -55,20 +56,27 @@ class LicenseEnforcementTests(unittest.TestCase):
             self.assertEqual(session["license_plan"], "core")
             self.assertEqual(session["license_expires_at"], "2027-01-01")
 
-    def test_pending_customer_can_only_open_commercial_screens(self):
-        with patch(
-            "routes.auth.validate_icu_license",
-            return_value=LicenseCheckResult(valid=False, reason="pending_payment"),
-        ):
-            response = self.client.post(
-                "/login",
-                data={"username": Config.ADMIN_USERNAME, "password": Config.ADMIN_PASSWORD},
-            )
+    def test_new_customer_can_open_empty_trial_workspace(self):
+        self.client.get('/register')
+        with self.client.session_transaction() as session:
+            csrf_token = session['csrf_token']
+        response = self.client.post(
+            '/register',
+            data={
+                'csrf_token': csrf_token,
+                'organization_name': 'ICU Trial',
+                'full_name': 'Nguyễn Dùng Thử',
+                'email': 'trial@example.vn',
+                'username': 'icu.trial',
+                'password': 'matkhau-demo-123',
+                'password_confirm': 'matkhau-demo-123',
+            },
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/account/subscription", response.location)
+        self.assertIn('/dashboard', response.location)
         response = self.client.get("/dashboard")
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/account/subscription", response.location)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Bạn đang dùng thử ICU Predict'.encode(), response.data)
 
 
 if __name__ == "__main__":

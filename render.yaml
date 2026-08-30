@@ -18,6 +18,8 @@ services:
         generateValue: true
       - key: ICU_PREDICT_DEMO_MODE
         value: "false"
+      - key: ICU_LICENSE_ENFORCEMENT_ENABLED
+        value: "true"
       - key: LICENSE_ADMIN_DEMO_MODE
         value: "false"
       - key: SESSION_COOKIE_SECURE

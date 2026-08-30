@@ -7,15 +7,26 @@
         <h1>Quản lý bệnh nhân</h1>
         <div class="breadcrumb">Danh sách bệnh nhân đang theo dõi</div>
     </div>
+    {% if trial_status.can_add_patient %}
     <button class="btn btn-primary" onclick="document.getElementById('addPatientModal').classList.add('active')" id="btn-add-patient">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Thêm bệnh nhân
     </button>
+    {% else %}
+    <a href="{{ url_for('account.subscription') }}" class="btn btn-primary" id="btn-buy-key-patients">Mua key để thêm bệnh nhân</a>
+    {% endif %}
 </div>
 
 <div class="page-body">
+    {% if trial_status.is_trial %}
+    <section class="trial-usage-banner {{ 'is-exhausted' if trial_status.is_exhausted else '' }}" aria-label="Trạng thái dùng thử">
+        <div class="trial-usage-icon">{{ '!' if trial_status.is_exhausted else 'i' }}</div>
+        <div class="trial-usage-copy"><strong>{{ 'Đã đạt giới hạn dùng thử' if trial_status.is_exhausted else 'Không gian dùng thử của tổ chức' }}</strong><span>Bạn tự nhập tối đa {{ trial_status.patient_limit }} ca. Hiện có {{ trial_status.patient_count }}/{{ trial_status.patient_limit }} ca và {{ trial_status.assessment_count }}/{{ trial_status.assessment_limit }} bản ghi đánh giá.</span></div>
+        <a href="{{ url_for('account.subscription') }}" class="btn btn-outline btn-sm">Xem gói & mua key</a>
+    </section>
+    {% endif %}
     <!-- Search -->
     <div class="card mb-3">
         <div class="card-body" style="padding: 16px 24px;">
@@ -84,7 +95,7 @@
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                                 <h3>Chưa có bệnh nhân</h3>
-                                <p>Bấm “Thêm bệnh nhân” để bắt đầu</p>
+                                <p>{% if trial_status.is_trial %}Tự nhập ca đầu tiên để trải nghiệm quy trình dùng thử.{% else %}Bấm “Thêm bệnh nhân” để bắt đầu.{% endif %}</p>
                             </div>
                         </td>
                     </tr>
@@ -144,6 +155,7 @@
                 <div class="form-group">
                     <label for="notes">Ghi chú</label>
                     <textarea id="notes" name="notes" class="form-control" placeholder="Ghi chú thêm..."></textarea>
+                    {% if trial_status.is_trial %}<span class="form-help">Ca này sẽ tính vào giới hạn dùng thử của tổ chức.</span>{% endif %}
                 </div>
             </div>
             <div class="modal-footer">

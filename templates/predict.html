@@ -12,6 +12,13 @@
 
 <div class="page-body">
     <div class="research-banner" role="note"><div class="research-banner-icon">i</div><div><strong>AI hỗ trợ phát hiện tín hiệu để điều phối rà soát</strong><span>Hệ thống không đưa khuyến nghị điều trị, không chẩn đoán và không thay thế bác sĩ.</span></div></div>
+    {% if trial_status.is_trial %}
+    <section class="trial-usage-banner {{ 'is-exhausted' if trial_status.is_exhausted else '' }}" aria-label="Trạng thái dùng thử">
+        <div class="trial-usage-icon">{{ '!' if trial_status.is_exhausted else 'i' }}</div>
+        <div class="trial-usage-copy"><strong>Đánh giá trong phạm vi dùng thử</strong><span>Chỉ dùng dữ liệu do tổ chức bạn tự nhập. Còn {{ trial_status.remaining_assessments }}/{{ trial_status.assessment_limit }} lượt tạo bản ghi và {{ trial_status.remaining_patients }}/{{ trial_status.patient_limit }} ca bệnh có thể thêm.</span></div>
+        <a href="{{ url_for('account.subscription') }}" class="btn btn-outline btn-sm">Xem gói & mua key</a>
+    </section>
+    {% endif %}
     <form method="POST" action="{{ url_for('predictions.predict') }}" id="predict-form">
         <div class="intake-layout">
             <section class="card intake-main">
@@ -19,8 +26,15 @@
                 <div class="card-body">
                     <div class="form-group">
                         <label for="patient_id">Bệnh nhân</label>
-                        <select id="patient_id" name="patient_id" class="form-control"><option value="">-- Bản ghi chưa gắn bệnh nhân --</option>{% for p in patients %}<option value="{{ p.id }}" {% if request.args.get('patient_id')|int == p.id %}selected{% endif %}>{{ p.patient_code }} — {{ p.name }}</option>{% endfor %}</select>
+                        <select id="patient_id" name="patient_id" class="form-control" {% if trial_status.is_trial %}required{% endif %}>
+                            <option value="">{{ '-- Chọn ca bệnh do tổ chức bạn tự nhập --' if trial_status.is_trial else '-- Bản ghi chưa gắn bệnh nhân --' }}</option>
+                            {% for p in patients %}<option value="{{ p.id }}" {% if request.args.get('patient_id')|int == p.id %}selected{% endif %}>{{ p.patient_code }} — {{ p.name }}</option>{% endfor %}
+                        </select>
+                        {% if trial_status.is_trial %}
+                        <div class="indicator-hint">Chưa có ca phù hợp? <a href="{{ url_for('patients.list_patients') }}">Thêm bệnh nhân dùng thử</a> trước khi tạo bản ghi.</div>
+                        {% else %}
                         <div class="indicator-hint">Chỉ người được phân quyền mới được tạo bản ghi gắn danh tính bệnh nhân.</div>
+                        {% endif %}
                     </div>
                     <div class="form-group">
                         <label for="notes">Ghi chú bối cảnh</label>

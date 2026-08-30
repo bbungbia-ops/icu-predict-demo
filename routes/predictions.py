@@ -8,9 +8,21 @@ from models.signal_presentation import (
     describe_signal,
     explain_priority_reasons,
 )
+from models.trial_access import get_trial_status
 import json
 
 predictions_bp = Blueprint('predictions', __name__)
+
+
+def current_trial_status(connection):
+    return get_trial_status(
+        connection,
+        session.get('organization_id'),
+        role=session.get('role'),
+        license_valid=session.get('license_valid', False),
+        patient_limit=current_app.config['TRIAL_PATIENT_LIMIT'],
+        assessment_limit=current_app.config['TRIAL_ASSESSMENT_LIMIT'],
+    )
 
 
 @predictions_bp.route('/predict', methods=['GET'])
@@ -19,16 +31,52 @@ def predict_form():
     db_path = current_app.config['DATABASE_PATH']
     conn = get_db_connection(db_path)
     patients = conn.execute(
-        "SELECT id, patient_code, name FROM patients WHERE status = 'active' ORDER BY name"
+        "SELECT id, patient_code, name FROM patients WHERE status = 'active' AND organization_id = ? ORDER BY name",
+        (session.get('organization_id'),),
     ).fetchall()
+    trial_status = current_trial_status(conn)
     conn.close()
-    return render_template('predict.html', patients=patients)
+    if not trial_status['can_create_assessment']:
+        flash(
+            f"Bạn đã hoàn tất {trial_status['assessment_limit']} lượt đánh giá dùng thử. "
+            'Hãy chọn gói để tiếp tục sử dụng.',
+            'error',
+        )
+        return redirect(url_for('account.subscription'))
+    return render_template('predict.html', patients=patients, trial_status=trial_status)
 
 
 @predictions_bp.route('/predict', methods=['POST'])
 @login_required
 def predict():
     predictor = current_app.config['PREDICTOR']
+
+    patient_id = request.form.get('patient_id', type=int)
+    db_path = current_app.config['DATABASE_PATH']
+    conn = get_db_connection(db_path)
+    trial_status = current_trial_status(conn)
+    if not trial_status['can_create_assessment']:
+        conn.close()
+        flash(
+            f"Bạn đã hoàn tất {trial_status['assessment_limit']} lượt đánh giá dùng thử. "
+            'Hãy chọn gói để tiếp tục sử dụng.',
+            'error',
+        )
+        return redirect(url_for('account.subscription'))
+    if trial_status['is_trial'] and not patient_id:
+        conn.close()
+        flash('Bản dùng thử yêu cầu chọn một ca bệnh do tổ chức bạn tự nhập.', 'error')
+        return redirect(url_for('predictions.predict_form'))
+    if patient_id:
+        patient = conn.execute(
+            'SELECT id FROM patients WHERE id = ? AND organization_id = ?',
+            (patient_id, session.get('organization_id')),
+        ).fetchone()
+        if not patient:
+            conn.close()
+            flash('Không tìm thấy bệnh nhân trong tổ chức của bạn.', 'error')
+            return redirect(url_for('predictions.predict_form'))
+    conn.close()
 
     raw_values = {
         'sofa': request.form.get('sofa'),
@@ -53,17 +101,15 @@ def predict():
         return redirect(url_for('predictions.predict_form'))
 
     # Save to database
-    patient_id = request.form.get('patient_id', type=int)
     notes = request.form.get('notes', '').strip()
 
-    db_path = current_app.config['DATABASE_PATH']
     conn = get_db_connection(db_path)
 
     cursor = conn.execute(
-        'INSERT INTO predictions (patient_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, '
+        'INSERT INTO predictions (patient_id, organization_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, '
         'risk_score, risk_level, predicted_by, notes, model_version, model_status, out_of_distribution) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        (patient_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs,
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        (patient_id, session.get('organization_id'), sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs,
          result['risk_score'], result['risk_level'], session.get('user_id'), notes,
          result['model_version'], result['model_status'], int(bool(result['out_of_distribution'])))
     )
@@ -87,8 +133,8 @@ def result(prediction_id):
         LEFT JOIN patients p ON pr.patient_id = p.id
         LEFT JOIN users u ON pr.predicted_by = u.id
         LEFT JOIN users reviewer ON pr.acknowledged_by = reviewer.id
-        WHERE pr.id = ?
-    ''', (prediction_id,)).fetchone()
+        WHERE pr.id = ? AND pr.organization_id = ?
+    ''', (prediction_id, session.get('organization_id'))).fetchone()
 
     conn.close()
 
@@ -147,8 +193,11 @@ def acknowledge(prediction_id):
                acknowledgement_note = ?,
                review_outcome = ?,
                utility_score = ?
-           WHERE id = ? AND acknowledged_at IS NULL''',
-        (session.get('user_id'), acknowledgement_note, review_outcome, utility_score, prediction_id),
+           WHERE id = ? AND organization_id = ? AND acknowledged_at IS NULL''',
+        (
+            session.get('user_id'), acknowledgement_note, review_outcome, utility_score,
+            prediction_id, session.get('organization_id'),
+        ),
     )
     conn.commit()
     conn.close()
@@ -172,9 +221,10 @@ def history():
         FROM predictions pr
         LEFT JOIN patients p ON pr.patient_id = p.id
         LEFT JOIN users u ON pr.predicted_by = u.id
+        WHERE pr.organization_id = ?
         ORDER BY pr.predicted_at DESC
         LIMIT 50
-    ''').fetchall()
+    ''', (session.get('organization_id'),)).fetchall()
 
     predictions = [
         {**dict(prediction), 'signal': describe_signal(prediction['risk_level'])}

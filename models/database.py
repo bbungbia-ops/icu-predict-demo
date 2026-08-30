@@ -154,8 +154,10 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
             status TEXT DEFAULT 'active',
             notes TEXT,
             created_by INTEGER,
+            organization_id INTEGER,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (created_by) REFERENCES users(id)
+            FOREIGN KEY (created_by) REFERENCES users(id),
+            FOREIGN KEY (organization_id) REFERENCES organizations(id)
         )
     ''')
 
@@ -164,6 +166,7 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
         CREATE TABLE IF NOT EXISTS predictions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_id INTEGER,
+            organization_id INTEGER,
             sofa REAL NOT NULL,
             map_value REAL NOT NULL,
             pao2_fio2 REAL NOT NULL,
@@ -185,12 +188,19 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
             review_outcome TEXT,
             utility_score INTEGER,
             FOREIGN KEY (patient_id) REFERENCES patients(id),
+            FOREIGN KEY (organization_id) REFERENCES organizations(id),
             FOREIGN KEY (predicted_by) REFERENCES users(id),
             FOREIGN KEY (acknowledged_by) REFERENCES users(id)
         )
     ''')
 
-    # Lightweight migration for databases created by previous demo versions.
+    # Lightweight migrations for databases created by previous demo versions.
+    patient_columns = {
+        row['name'] for row in cursor.execute('PRAGMA table_info(patients)').fetchall()
+    }
+    if 'organization_id' not in patient_columns:
+        cursor.execute('ALTER TABLE patients ADD COLUMN organization_id INTEGER')
+
     prediction_columns = {
         row['name'] for row in cursor.execute('PRAGMA table_info(predictions)').fetchall()
     }
@@ -203,10 +213,27 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
         'acknowledgement_note': 'TEXT',
         'review_outcome': 'TEXT',
         'utility_score': 'INTEGER',
+        'organization_id': 'INTEGER',
     }
     for column, definition in migration_columns.items():
         if column not in prediction_columns:
             cursor.execute(f'ALTER TABLE predictions ADD COLUMN {column} {definition}')
+
+    # Historical demo records pre-date tenant ownership. Keep them available
+    # to the demo organization only; newly registered organizations start empty.
+    cursor.execute(
+        'UPDATE patients SET organization_id = ? WHERE organization_id IS NULL',
+        (organization_id,),
+    )
+    cursor.execute(
+        '''UPDATE predictions
+           SET organization_id = COALESCE(
+               (SELECT organization_id FROM patients WHERE patients.id = predictions.patient_id),
+               ?
+           )
+           WHERE organization_id IS NULL''',
+        (organization_id,),
+    )
 
     # Create default admin user if not exists
     existing = cursor.execute(
@@ -239,9 +266,9 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
         ]
         for p in sample_patients:
             cursor.execute(
-                'INSERT INTO patients (patient_code, name, age, gender, ward, admission_date, status, created_by) '
-                'VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
-                p
+                'INSERT INTO patients (patient_code, name, age, gender, ward, admission_date, status, organization_id, created_by) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)',
+                (*p, organization_id)
             )
 
         # Seed sample predictions
@@ -257,9 +284,9 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
         ]
         for pr in sample_predictions:
             cursor.execute(
-                'INSERT INTO predictions (patient_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, risk_score, risk_level, predicted_by) '
-                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
-                pr
+                'INSERT INTO predictions (patient_id, organization_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, risk_score, risk_level, predicted_by) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)',
+                (pr[0], organization_id, *pr[1:])
             )
 
     # Upgrade only the known placeholder demo names on existing databases.

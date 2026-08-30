@@ -23,6 +23,17 @@
         </div>
     </div>
 
+    {% if trial_status.is_trial %}
+    <section class="trial-usage-banner {{ 'is-exhausted' if trial_status.is_exhausted else '' }}" aria-label="Trạng thái dùng thử">
+        <div class="trial-usage-icon">{{ '!' if trial_status.is_exhausted else 'i' }}</div>
+        <div class="trial-usage-copy">
+            <strong>{{ 'Bản dùng thử đã đạt giới hạn' if trial_status.is_exhausted else 'Bạn đang dùng thử ICU Predict' }}</strong>
+            <span>Ca bệnh: {{ trial_status.patient_count }}/{{ trial_status.patient_limit }} · Bản ghi đánh giá: {{ trial_status.assessment_count }}/{{ trial_status.assessment_limit }}. Dữ liệu của tổ chức bạn là riêng tư và bắt đầu trống.</span>
+        </div>
+        <a href="{{ url_for('account.subscription') }}" class="btn btn-outline btn-sm">{{ 'Mua key để tiếp tục' if trial_status.is_exhausted else 'Xem gói & mua key' }}</a>
+    </section>
+    {% endif %}
+
     <div class="stats-grid workflow-stats">
         <div class="stat-card primary">
             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
@@ -81,7 +92,25 @@
                 </tbody>
             </table>
         </div>
-        <p class="table-scroll-hint">Vuốt ngang để xem đầy đủ các cột.</p>
+        <div class="priority-queue-card-list">
+            {% for item in review_queue %}
+            <article class="priority-queue-item signal-{{ item.signal.key }}">
+                <div class="priority-queue-topline">
+                    <div><strong>{{ item.patient_code }}</strong><span>{{ item.name }}</span></div>
+                    <span class="signal-badge signal-{{ item.signal.key }}">{{ item.signal.label }}</span>
+                </div>
+                <div class="priority-queue-meta"><span>{{ item.ward or 'Chưa phân khoa' }}</span><span>{{ item.predicted_at }}</span></div>
+                <div class="priority-queue-reasons"><span>Vì sao cần xem trước</span><ul class="priority-reason-list">{% for reason in item.priority_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
+                <div class="priority-queue-footer">
+                    {% if item.out_of_distribution %}<span class="data-state caution">Ngoài phạm vi huấn luyện</span>{% else %}<span class="data-state ready">Trong phạm vi dữ liệu demo</span>{% endif %}
+                    <a href="{{ url_for('predictions.result', prediction_id=item.id) }}" class="btn btn-outline btn-sm">Mở đánh giá</a>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-workspace"><strong>Không có bản ghi nào đang chờ đánh giá</strong><span>Các bản ghi mới có tín hiệu cần xem xét sẽ xuất hiện tại đây.</span></div>
+            {% endfor %}
+        </div>
+        <p class="table-scroll-hint priority-table-hint">Vuốt ngang để xem đầy đủ các cột.</p>
     </div>
 
     <section class="coordination-questions" aria-label="Ba câu hỏi điều phối">

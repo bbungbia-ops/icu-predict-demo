@@ -16,6 +16,13 @@
         <div><strong>Mua key theo tổ chức</strong><span>Bạn chọn gói, hệ thống tạo một đơn cùng key chờ thanh toán. Key chỉ được kích hoạt sau khi giao dịch được xác nhận tự động.</span></div>
     </div>
 
+    {% if trial_status.is_trial %}
+    <section class="trial-usage-banner {{ 'is-exhausted' if trial_status.is_exhausted else '' }}" aria-label="Trạng thái dùng thử">
+        <div class="trial-usage-icon">{{ '!' if trial_status.is_exhausted else 'i' }}</div>
+        <div class="trial-usage-copy"><strong>{{ 'Bạn cần key để tiếp tục sử dụng' if trial_status.is_exhausted else 'Bạn đang dùng thử với dữ liệu của riêng tổ chức' }}</strong><span>Đã dùng {{ trial_status.patient_count }}/{{ trial_status.patient_limit }} ca bệnh và {{ trial_status.assessment_count }}/{{ trial_status.assessment_limit }} bản ghi. Khi key được kích hoạt, giới hạn dùng thử được gỡ bỏ.</span></div>
+    </section>
+    {% endif %}
+
     {% if current_subscription and current_plan %}
     <section class="subscription-hero">
         <div class="subscription-identity">

@@ -48,6 +48,7 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="mobileNavToggle"', response.data)
         self.assertIn(b"table-scroll-hint", response.data)
+        self.assertIn(b"priority-queue-card-list", response.data)
 
     def test_demo_patients_have_vietnamese_names(self):
         conn = get_db_connection(self.db_path)
@@ -195,6 +196,102 @@ class ClinicalWorkflowTests(unittest.TestCase):
         with customer.session_transaction() as session:
             self.assertTrue(session['license_valid'])
             self.assertEqual(session['license_plan'], 'core')
+
+    def test_new_organization_starts_empty_and_has_three_trial_cases(self):
+        customer = self.app.test_client()
+        customer.get('/register')
+        with customer.session_transaction() as session:
+            csrf_token = session['csrf_token']
+        response = customer.post(
+            '/register',
+            data={
+                'csrf_token': csrf_token,
+                'organization_name': 'Bệnh viện Dùng Thử',
+                'full_name': 'Lê Bác Sĩ',
+                'email': 'trial.customer@example.vn',
+                'username': 'trial.customer',
+                'password': 'matkhau-demo-123',
+                'password_confirm': 'matkhau-demo-123',
+            },
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Bạn đang dùng thử ICU Predict'.encode(), response.data)
+
+        patients_page = customer.get('/patients')
+        self.assertIn('Chưa có bệnh nhân'.encode(), patients_page.data)
+        self.assertNotIn('Nguyễn Minh Anh'.encode(), patients_page.data)
+
+        conn = get_db_connection(self.db_path)
+        organization = conn.execute(
+            "SELECT id FROM organizations WHERE name = 'Bệnh viện Dùng Thử'"
+        ).fetchone()
+        self.assertIsNotNone(organization)
+        self.assertEqual(
+            conn.execute('SELECT COUNT(*) FROM patients WHERE organization_id = ?', (organization['id'],)).fetchone()[0],
+            0,
+        )
+        conn.close()
+
+        for number in range(1, 4):
+            response = customer.post(
+                '/patients/add',
+                data={
+                    'patient_code': f'TRIAL-{number}',
+                    'name': f'Bệnh nhân thử nghiệm {number}',
+                    'age': '50',
+                    'gender': 'Nam',
+                    'ward': 'ICU-Thử',
+                },
+            )
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('/patients', response.location)
+
+        response = customer.post(
+            '/patients/add',
+            data={'patient_code': 'TRIAL-4', 'name': 'Không được tạo'},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/account/subscription', response.location)
+
+        conn = get_db_connection(self.db_path)
+        patient = conn.execute(
+            'SELECT id FROM patients WHERE organization_id = ? ORDER BY id LIMIT 1',
+            (organization['id'],),
+        ).fetchone()
+        self.assertEqual(
+            conn.execute('SELECT COUNT(*) FROM patients WHERE organization_id = ?', (organization['id'],)).fetchone()[0],
+            3,
+        )
+        conn.close()
+
+        # Demo data and records from another organization cannot be opened by ID.
+        response = customer.get('/patients/1', follow_redirects=True)
+        self.assertIn('Không tìm thấy bệnh nhân'.encode(), response.data)
+        response = customer.get('/predict/result/2', follow_redirects=True)
+        self.assertIn('Không tìm thấy bản ghi đánh giá'.encode(), response.data)
+
+        assessment_data = {
+            'patient_id': str(patient['id']), 'sofa': '8', 'map_value': '65',
+            'pao2_fio2': '160', 'bilirubin': '1.2', 'creatinine': '1.1',
+            'platelet': '180', 'gcs': '14', 'notes': 'Ca dùng thử',
+        }
+        for _ in range(3):
+            response = customer.post('/predict', data=assessment_data)
+            self.assertEqual(response.status_code, 302)
+            self.assertIn('/predict/result/', response.location)
+        response = customer.post('/predict', data=assessment_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/account/subscription', response.location)
+
+    def test_system_admin_is_not_limited_to_three_trial_cases(self):
+        response = self.client.post(
+            '/patients/add',
+            data={'patient_code': 'ADMIN-UNLIMITED', 'name': 'Ca quản trị không giới hạn'},
+            follow_redirects=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Đã thêm bệnh nhân thành công'.encode(), response.data)
 
 
 if __name__ == "__main__":

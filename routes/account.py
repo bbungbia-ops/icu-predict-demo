@@ -17,6 +17,7 @@ from license_admin.database import (
 from license_admin.plans import PLAN_CATALOG, format_vnd, format_vnd_millions, payment_term_label
 from models.database import get_db_connection
 from models.license_client import validate_icu_license
+from models.trial_access import get_trial_status
 from routes.auth import login_required, valid_csrf_token
 
 
@@ -164,6 +165,14 @@ def subscription():
                    ORDER BY renews_on DESC LIMIT 1''',
                 (organization['id'],),
             ).fetchone()
+        trial_status = get_trial_status(
+            connection,
+            organization['id'] if organization else None,
+            role=session.get('role'),
+            license_valid=session.get('license_valid', False),
+            patient_limit=current_app.config['TRIAL_PATIENT_LIMIT'],
+            assessment_limit=current_app.config['TRIAL_ASSESSMENT_LIMIT'],
+        )
     finally:
         connection.close()
 
@@ -204,6 +213,7 @@ def subscription():
         current_payment_term=payment_term_label(current_plan) if current_plan else None,
         current_period=billing_cycle_label(current_plan['validity_days']) if current_plan else None,
         plans=plan_cards(),
+        trial_status=trial_status,
     )
 
 

@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, send_file
+from flask import Blueprint, current_app, send_file, session
 from routes.auth import login_required
 from models.database import get_db_connection
 from models.signal_presentation import describe_signal
@@ -70,8 +70,8 @@ def generate_report(prediction_id):
         FROM predictions pr
         LEFT JOIN patients p ON pr.patient_id = p.id
         LEFT JOIN users u ON pr.predicted_by = u.id
-        WHERE pr.id = ?
-    ''', (prediction_id,)).fetchone()
+        WHERE pr.id = ? AND pr.organization_id = ?
+    ''', (prediction_id, session.get('organization_id'))).fetchone()
 
     conn.close()
 

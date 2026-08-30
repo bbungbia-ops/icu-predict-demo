@@ -7,6 +7,15 @@ def as_bool(value, default=False):
     return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
+def positive_int(value, default):
+    """Read a positive integer setting without making startup fragile."""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
+
+
 class Config:
     # Giá trị mặc định chỉ phục vụ môi trường demo cục bộ. Khi triển khai phải
     # đặt SECRET_KEY và thông tin quản trị bằng biến môi trường riêng.
@@ -31,7 +40,13 @@ class Config:
     DEMO_MODE = as_bool(os.environ.get('ICU_PREDICT_DEMO_MODE'), default=True)
     # Khi bật, ICU Predict kiểm tra key với license_admin ở mỗi lần đăng nhập
     # thành công. Mặc định tắt để bản demo cục bộ vẫn chạy độc lập.
-    LICENSE_ENFORCEMENT_ENABLED = as_bool(os.environ.get('ICU_LICENSE_ENFORCEMENT_ENABLED'))
+    LICENSE_ENFORCEMENT_ENABLED = as_bool(
+        os.environ.get('ICU_LICENSE_ENFORCEMENT_ENABLED'), default=not DEMO_MODE
+    )
+    # Tổ chức mới bắt đầu bằng dữ liệu trống. Họ có thể tự tạo một số ca thử
+    # nghiệm trước khi cần mua key; quản trị viên hệ thống không bị giới hạn.
+    TRIAL_PATIENT_LIMIT = positive_int(os.environ.get('ICU_TRIAL_PATIENT_LIMIT'), 3)
+    TRIAL_ASSESSMENT_LIMIT = positive_int(os.environ.get('ICU_TRIAL_ASSESSMENT_LIMIT'), 3)
     LICENSE_KEY = os.environ.get('ICU_LICENSE_KEY', '')
     LICENSE_VALIDATION_URL = os.environ.get('LICENSE_VALIDATION_URL', '')
     LICENSE_API_SHARED_SECRET = os.environ.get('ICU_INTEGRATION_SHARED_SECRET', '')
