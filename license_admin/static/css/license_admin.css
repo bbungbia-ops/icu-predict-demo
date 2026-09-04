@@ -15,7 +15,8 @@ a:hover { color: var(--teal); }
 .sidebar { z-index: 20; display: flex; flex-direction: column; min-height: 100vh; padding: 26px 16px 18px; color: #d8e4f9; background: linear-gradient(155deg, #09162e 0%, #102849 100%); box-shadow: 14px 0 35px rgba(5, 18, 43, .08); }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 26px; color: #fff; }
 .brand:hover { color: #fff; }
-.brand-mark, .admin-login-mark { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; color: #fff; font: 800 29px/1 "Plus Jakarta Sans", sans-serif; background: linear-gradient(135deg, #08bda1, #087e92); box-shadow: 0 9px 22px rgba(4, 188, 158, .27); }
+.brand-mark, .admin-login-mark { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; color: #fff; background: linear-gradient(135deg, #08bda1, #087e92); box-shadow: 0 9px 22px rgba(4, 188, 158, .27); }
+.brand-mark svg, .admin-login-mark svg { width: 27px; height: 27px; overflow: visible; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.25; }
 .brand strong, .brand small { display: block; }
 .brand strong { font: 800 17px/1.15 "Plus Jakarta Sans", sans-serif; letter-spacing: -.45px; }
 .brand small { margin-top: 4px; color: #72e7d2; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
