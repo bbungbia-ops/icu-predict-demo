@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Cổng quản trị license key ICU Predict">
+    <meta name="theme-color" content="#0b1326">
     <title>{% block title %}License Admin · ICU Predict{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/license_admin.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
@@ -11,11 +12,15 @@
 <body>
 {% if session.get('admin_id') %}
 <div class="shell">
-    <aside class="sidebar">
+    <button class="admin-mobile-toggle" id="adminMobileToggle" type="button" aria-controls="adminSidebar" aria-expanded="false">
+        <span></span><span></span><span></span><b>Menu</b>
+    </button>
+    <aside class="sidebar" id="adminSidebar">
         <a class="brand" href="{{ url_for('license_portal.dashboard') }}">
             <span class="brand-mark">⌁</span>
-            <span><strong>ICU Predict</strong><small>License Admin</small></span>
+            <span><strong>ICU Predict</strong><small>Command Center</small></span>
         </a>
+        <div class="sidebar-label">Điều hành thương mại</div>
         <nav>
             <a href="{{ url_for('license_portal.dashboard') }}" class="{{ 'active' if request.endpoint == 'license_portal.dashboard' else '' }}">Tổng quan</a>
             <a href="{{ url_for('license_portal.order_list') }}" class="{{ 'active' if request.endpoint in ('license_portal.order_list', 'license_portal.order_detail') else '' }}">Đơn hàng</a>
@@ -23,13 +28,15 @@
             <a href="{{ url_for('license_portal.license_list') }}" class="{{ 'active' if request.endpoint == 'license_portal.license_list' else '' }}">License keys</a>
         </nav>
         <div class="sidebar-foot">
-            <span>Đăng nhập: {{ session.get('admin_username') }}</span>
+            <span class="admin-avatar">{{ session.get('admin_username', 'A')[:1]|upper }}</span>
+            <span><b>{{ session.get('admin_username') }}</b><small>Quản trị viên</small></span>
             <form method="post" action="{{ url_for('license_portal.logout') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="link-button">Đăng xuất</button>
             </form>
         </div>
     </aside>
+    <button class="admin-sidebar-backdrop" id="adminSidebarBackdrop" type="button" aria-label="Đóng menu"></button>
     <main class="content">
 {% else %}
 <main class="login-main">
@@ -47,6 +54,20 @@
 </div>
 {% else %}
 </main>
+{% endif %}
+{% if session.get('admin_id') %}
+<script>
+(() => {
+    const toggle = document.getElementById('adminMobileToggle');
+    const sidebar = document.getElementById('adminSidebar');
+    const backdrop = document.getElementById('adminSidebarBackdrop');
+    if (!toggle || !sidebar || !backdrop) return;
+    const close = () => { sidebar.classList.remove('open'); document.body.classList.remove('admin-nav-open'); toggle.setAttribute('aria-expanded', 'false'); };
+    toggle.addEventListener('click', () => { const opening = !sidebar.classList.contains('open'); sidebar.classList.toggle('open', opening); document.body.classList.toggle('admin-nav-open', opening); toggle.setAttribute('aria-expanded', String(opening)); });
+    backdrop.addEventListener('click', close);
+    sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+})();
+</script>
 {% endif %}
 </body>
 </html>
