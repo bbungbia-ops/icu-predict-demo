@@ -3,6 +3,13 @@
 
 {% block body %}
 <div class="login-page">
+    <!-- Floating orbs (pure CSS) -->
+    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0">
+        <div style="position:absolute;width:200px;height:200px;top:15%;right:10%;border-radius:50%;background:radial-gradient(circle,rgba(0,191,165,0.12) 0%,transparent 70%);animation:floatOrb 10s ease-in-out infinite alternate"></div>
+        <div style="position:absolute;width:160px;height:160px;top:60%;left:5%;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,0.08) 0%,transparent 70%);animation:floatOrb 12s ease-in-out infinite alternate-reverse"></div>
+        <div style="position:absolute;width:120px;height:120px;top:30%;left:40%;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.06) 0%,transparent 70%);animation:floatOrb 8s ease-in-out infinite alternate"></div>
+    </div>
+
     <div class="login-card">
         <div class="login-logo">
             <div class="logo-icon">
@@ -29,9 +36,13 @@
                 <label for="username">Tên đăng nhập</label>
                 <input type="text" id="username" name="username" class="form-control" placeholder="Nhập tên đăng nhập" required autofocus>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="position:relative">
                 <label for="password">Mật khẩu</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required style="padding-right:42px">
+                <button type="button" onclick="const p=document.getElementById('password');p.type=p.type==='password'?'text':'password';this.querySelector('.eye-on').style.display=p.type==='password'?'block':'none';this.querySelector('.eye-off').style.display=p.type==='password'?'none':'block'" style="position:absolute;right:10px;bottom:8px;background:none;border:none;cursor:pointer;color:var(--gray-400);padding:4px" title="Hiển thị mật khẩu">
+                    <svg class="eye-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                </button>
             </div>
             <button type="submit" class="btn btn-primary btn-lg btn-block" id="btn-login">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
