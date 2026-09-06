@@ -5,10 +5,27 @@ from models.signal_presentation import describe_signal
 from fpdf import FPDF
 import io
 import os
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 reports_bp = Blueprint('reports', __name__)
+
+
+def report_text(value, fallback: str = 'N/A') -> str:
+    """Format database values safely before giving them to FPDF.
+
+    SQLite returns dates as strings in local demo mode, whereas psycopg returns
+    ``date`` and ``datetime`` objects when the same record comes from Supabase.
+    FPDF expects text-like values and otherwise raises an AttributeError while
+    rendering the cell, resulting in a 500 response only after deployment.
+    """
+    if value is None or value == '':
+        return fallback
+    if isinstance(value, datetime):
+        return value.strftime('%d/%m/%Y %H:%M')
+    if isinstance(value, date):
+        return value.strftime('%d/%m/%Y')
+    return str(value)
 
 
 def resolve_unicode_fonts() -> tuple[Path, Path, Path]:
@@ -90,14 +107,14 @@ def generate_report(prediction_id):
 
     pdf.set_font('Vietnamese', '', 11)
     info_data = [
-        ('Mã bệnh nhân:', prediction['patient_code'] or 'N/A'),
-        ('Họ và tên:', prediction['patient_name'] or 'N/A'),
-        ('Tuổi:', str(prediction['age']) if prediction['age'] else 'N/A'),
-        ('Giới tính:', prediction['gender'] or 'N/A'),
-        ('Khoa:', prediction['ward'] or 'N/A'),
-        ('Ngày nhập viện:', prediction['admission_date'] or 'N/A'),
-        ('Bác sĩ:', prediction['doctor_name'] or 'N/A'),
-        ('Thời gian tạo bản ghi:', prediction['predicted_at'] or 'N/A'),
+        ('Mã bệnh nhân:', report_text(prediction['patient_code'])),
+        ('Họ và tên:', report_text(prediction['patient_name'])),
+        ('Tuổi:', report_text(prediction['age'])),
+        ('Giới tính:', report_text(prediction['gender'])),
+        ('Khoa:', report_text(prediction['ward'])),
+        ('Ngày nhập viện:', report_text(prediction['admission_date'])),
+        ('Bác sĩ:', report_text(prediction['doctor_name'])),
+        ('Thời gian tạo bản ghi:', report_text(prediction['predicted_at'])),
     ]
 
     for label, value in info_data:
@@ -144,7 +161,7 @@ def generate_report(prediction_id):
             pdf.set_fill_color(255, 255, 255)
 
         pdf.cell(col_widths[0], 7, name, border=1, fill=True, align='L')
-        pdf.cell(col_widths[1], 7, str(val), border=1, fill=True, align='C')
+        pdf.cell(col_widths[1], 7, report_text(val), border=1, fill=True, align='C')
         pdf.cell(col_widths[2], 7, unit, border=1, fill=True, align='C')
         pdf.cell(col_widths[3], 7, normal, border=1, fill=True, align='C')
         pdf.ln()
@@ -161,11 +178,11 @@ def generate_report(prediction_id):
     pdf.cell(0, 7, f'Trạng thái quy trình: {review_status}', new_x='LMARGIN', new_y='NEXT')
     signal = describe_signal(prediction['risk_level'])
     pdf.cell(0, 7, f'Tín hiệu mô hình nghiên cứu: {signal["label"]}', new_x='LMARGIN', new_y='NEXT')
-    pdf.cell(0, 7, f'Phiên bản mô hình: {prediction["model_version"] or "bản ghi demo cũ"}', new_x='LMARGIN', new_y='NEXT')
+    pdf.cell(0, 7, f'Phiên bản mô hình: {report_text(prediction["model_version"], "bản ghi demo cũ")}', new_x='LMARGIN', new_y='NEXT')
     if prediction['acknowledged_at']:
-        pdf.cell(0, 7, f'Thời điểm xác nhận: {prediction["acknowledged_at"]}', new_x='LMARGIN', new_y='NEXT')
+        pdf.cell(0, 7, f'Thời điểm xác nhận: {report_text(prediction["acknowledged_at"])}', new_x='LMARGIN', new_y='NEXT')
         if prediction['acknowledgement_note']:
-            pdf.multi_cell(0, 7, f'Ghi chú đánh giá: {prediction["acknowledgement_note"]}')
+            pdf.multi_cell(0, 7, f'Ghi chú đánh giá: {report_text(prediction["acknowledgement_note"])}')
 
         # Bản ghi đã có xác nhận điện tử nên không cần dành thêm một trang chỉ
         # để ký tay. Giữ phần lưu ý ngay sau nhận định để tránh trang trống.
@@ -178,7 +195,7 @@ def generate_report(prediction_id):
         pdf.cell(95, 7, 'Bác sĩ phụ trách', align='C', new_x='LMARGIN', new_y='NEXT')
         pdf.ln(20)
         pdf.cell(95, 7, '', align='C')
-        pdf.cell(95, 7, prediction['doctor_name'] or '_______________', align='C', new_x='LMARGIN', new_y='NEXT')
+        pdf.cell(95, 7, report_text(prediction['doctor_name'], '_______________'), align='C', new_x='LMARGIN', new_y='NEXT')
         pdf.ln(8)
 
     # Disclaimer
@@ -192,7 +209,7 @@ def generate_report(prediction_id):
     # Output to bytes
     pdf_bytes = pdf.output()
 
-    patient_code = prediction['patient_code'] or 'unknown'
+    patient_code = report_text(prediction['patient_code'], 'unknown')
     filename = f'ICU_Report_{patient_code}_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf'
 
     return send_file(

@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from datetime import date, datetime
 from pathlib import Path
 
 from app import create_app
@@ -7,6 +8,7 @@ from config import Config
 from license_admin.plans import PLAN_CATALOG
 from models.database import get_db_connection, init_db
 from license_admin.database import activate_order, get_connection as get_license_connection, get_order
+from routes.reports import report_text
 
 
 class ClinicalWorkflowTests(unittest.TestCase):
@@ -107,6 +109,12 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "application/pdf")
         self.assertTrue(response.data.startswith(b"%PDF"))
+
+    def test_pdf_text_coerces_postgres_date_and_datetime_values(self):
+        """Supabase returns native Python date types, unlike SQLite demo data."""
+        self.assertEqual(report_text(date(2026, 9, 6)), '06/09/2026')
+        self.assertEqual(report_text(datetime(2026, 9, 6, 14, 30)), '06/09/2026 14:30')
+        self.assertEqual(report_text(None), 'N/A')
 
     def test_subscription_page_shows_current_plan(self):
         response = self.client.get("/account/subscription")
