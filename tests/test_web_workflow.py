@@ -109,6 +109,7 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.mimetype, "application/pdf")
         self.assertTrue(response.data.startswith(b"%PDF"))
+        self.assertIn("inline; filename=\"ICU_Report_BN002_", response.headers["Content-Disposition"])
 
     def test_pdf_text_coerces_postgres_date_and_datetime_values(self):
         """Supabase returns native Python date types, unlike SQLite demo data."""

@@ -1,9 +1,8 @@
-from flask import Blueprint, current_app, send_file, session
+from flask import Blueprint, Response, current_app, session
 from routes.auth import login_required
 from models.database import get_db_connection
 from models.signal_presentation import describe_signal
 from fpdf import FPDF
-import io
 import os
 from datetime import date, datetime
 from pathlib import Path
@@ -207,14 +206,19 @@ def generate_report(prediction_id):
         'thực hiện theo quy trình của cơ sở y tế.')
 
     # Output to bytes
-    pdf_bytes = pdf.output()
+    pdf_bytes = bytes(pdf.output())
 
     patient_code = report_text(prediction['patient_code'], 'unknown')
     filename = f'ICU_Report_{patient_code}_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf'
 
-    return send_file(
-        io.BytesIO(pdf_bytes),
+    # Open directly in the browser's PDF viewer, so users do not receive an
+    # unnamed download that Windows cannot associate with a PDF application.
+    return Response(
+        pdf_bytes,
         mimetype='application/pdf',
-        as_attachment=True,
-        download_name=filename
+        headers={
+            'Content-Disposition': f'inline; filename="{filename}"',
+            'Content-Length': str(len(pdf_bytes)),
+            'X-Content-Type-Options': 'nosniff',
+        },
     )
