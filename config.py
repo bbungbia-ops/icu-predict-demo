@@ -36,6 +36,12 @@ class Config:
     MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_model', 'icu_risk_model.joblib')
     ADMIN_USERNAME = os.environ.get('ICU_PREDICT_ADMIN_USERNAME', 'admin')
     ADMIN_PASSWORD = os.environ.get('ICU_PREDICT_ADMIN_PASSWORD', 'admin123')
+    # Chỉ dùng trong tình huống khôi phục có chủ đích: cập nhật mật khẩu của
+    # tài khoản quản trị mặc định tại lần khởi động kế tiếp. Biến này phải được
+    # tắt lại ngay sau khi thao tác hoàn tất.
+    RESET_DEFAULT_ADMIN_PASSWORD = as_bool(
+        os.environ.get('ICU_PREDICT_RESET_DEFAULT_ADMIN_PASSWORD'), default=False
+    )
     DEBUG = as_bool(os.environ.get('FLASK_DEBUG'))
     DEMO_MODE = as_bool(os.environ.get('ICU_PREDICT_DEMO_MODE'), default=True)
     # Khi bật, ICU Predict kiểm tra key với license_admin ở mỗi lần đăng nhập

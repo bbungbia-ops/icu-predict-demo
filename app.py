@@ -11,7 +11,12 @@ def create_app():
     app.config['DATABASE_PATH'] = Config.DATABASE_PATH
 
     # Initialize database
-    init_db(Config.DATABASE_PATH, Config.ADMIN_USERNAME, Config.ADMIN_PASSWORD)
+    init_db(
+        Config.DATABASE_PATH,
+        Config.ADMIN_USERNAME,
+        Config.ADMIN_PASSWORD,
+        reset_admin_password=Config.RESET_DEFAULT_ADMIN_PASSWORD,
+    )
 
     # Load AI model once
     predictor = ICUPredictor(Config.MODEL_PATH)

@@ -11,7 +11,13 @@ def get_db_connection(db_path):
     return connect_database(db_path)
 
 
-def init_db(db_path, admin_username='admin', admin_password='admin123'):
+def init_db(
+    db_path,
+    admin_username='admin',
+    admin_password='admin123',
+    *,
+    reset_admin_password=False,
+):
     """Initialize database tables and create default admin user."""
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
@@ -250,6 +256,11 @@ def init_db(db_path, admin_username='admin', admin_password='admin123'):
             'UPDATE users SET organization_id = ? WHERE id = ? AND organization_id IS NULL',
             (organization_id, existing['id']),
         )
+        if reset_admin_password:
+            cursor.execute(
+                'UPDATE users SET password_hash = ? WHERE id = ?',
+                (generate_password_hash(admin_password), existing['id']),
+            )
 
     # Seed sample patients if empty
     patient_count = cursor.execute('SELECT COUNT(*) FROM patients').fetchone()[0]
