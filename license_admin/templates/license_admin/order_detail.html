@@ -1,10 +1,130 @@
 {% extends 'license_admin/layout.html' %}
-{% block title %}{{ order.order_code }} · License Admin{% endblock %}
+{% block title %}{{ order.order_code }} · Chi tiết đơn hàng{% endblock %}
+{% block breadcrumb_title %}Chi tiết đơn {{ order.order_code }}{% endblock %}
 {% block content %}
-<header class="page-header"><div><div class="eyebrow">ĐƠN HÀNG {{ order.order_code }}</div><h1>{{ order.organization_name }}</h1><p>{{ plan_name(order.plan_code) }} · tạo lúc {{ order.created_at }}</p></div><div class="header-actions"><a class="button secondary" href="{{ url_for('license_portal.license_detail', license_id=order.license_id) }}">Xem license</a>{% if order.payment_status == 'pending' and config.DEMO_MODE %}<form method="post" action="{{ url_for('license_portal.simulate_payment', order_id=order.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button primary" type="submit">Mô phỏng thanh toán</button></form>{% endif %}</div></header>
+<header class="page-header">
+    <div>
+        <div class="eyebrow">CHI TIẾT ĐƠN HÀNG · {{ order.order_code }}</div>
+        <h1>{{ order.organization_name }}</h1>
+        <p>{{ plan_name(order.plan_code) }} · Khởi tạo lúc {{ order.created_at }}</p>
+    </div>
+    <div class="header-actions">
+        <a class="button secondary" href="{{ url_for('license_portal.order_list') }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Danh sách</span>
+        </a>
+        <a class="button secondary" href="{{ url_for('license_portal.license_detail', license_id=order.license_id) }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+            <span>Xem License</span>
+        </a>
+        {% if order.payment_status == 'pending' and config.DEMO_MODE %}
+        <form method="post" action="{{ url_for('license_portal.simulate_payment', order_id=order.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button primary" type="submit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                <span>Mô phỏng thanh toán SePay</span>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</header>
+
 <section class="detail-grid">
-    <article class="card"><div class="eyebrow">THANH TOÁN</div><h2>{{ format_vnd(order.amount_vnd) }}</h2><dl><dt>Trạng thái</dt><dd><span class="badge {{ order.payment_status }}">{{ order_status_label(order.payment_status) }}</span></dd><dt>Nội dung chuyển khoản</dt><dd><code>{{ order.transfer_content }}</code></dd><dt>Mã giao dịch</dt><dd>{{ order.bank_transaction_id or 'Chưa có' }}</dd><dt>Người chuyển</dt><dd>{{ order.payer_name or 'Chưa có' }}</dd><dt>Thời điểm xác nhận</dt><dd>{{ order.paid_at or 'Chưa có' }}</dd></dl></article>
-    <article class="card"><div class="eyebrow">LICENSE KEY</div><h2><code class="key">{{ order.license_key }}</code></h2><dl><dt>Trạng thái</dt><dd><span class="badge {{ order.license_status }}">{{ license_status_label(order.license_status) }}</span></dd><dt>Kích hoạt lúc</dt><dd>{{ order.activated_at or 'Chưa kích hoạt' }}</dd><dt>Hết hạn</dt><dd>{{ order.expires_at or 'Chờ thanh toán' }}</dd><dt>Số thiết bị</dt><dd>{{ order.max_devices }}</dd><dt>Mã tổ chức khách</dt><dd>{{ order.customer_organization_code or 'Tạo nội bộ bởi quản trị viên' }}</dd><dt>Người liên hệ</dt><dd>{{ order.contact_name }}{% if order.contact_email %} · {{ order.contact_email }}{% endif %}</dd><dt>Ghi chú</dt><dd>{{ order.notes or '—' }}</dd></dl></article>
+    <article class="card">
+        <div class="eyebrow">THANH TOÁN & GIAO DỊCH</div>
+        <h2>{{ format_vnd(order.amount_vnd) }}</h2>
+        <dl>
+            <div>
+                <dt>Trạng thái thanh toán</dt>
+                <dd><span class="badge {{ order.payment_status }}">{{ order_status_label(order.payment_status) }}</span></dd>
+            </div>
+            <div>
+                <dt>Cú pháp chuyển khoản</dt>
+                <dd><code>{{ order.transfer_content }}</code></dd>
+            </div>
+            <div>
+                <dt>Mã giao dịch ngân hàng</dt>
+                <dd>{{ order.bank_transaction_id or 'Chưa có thông tin' }}</dd>
+            </div>
+            <div>
+                <dt>Người chuyển tiền</dt>
+                <dd>{{ order.payer_name or 'Chưa xác nhận' }}</dd>
+            </div>
+            <div>
+                <dt>Thời điểm ghi nhận</dt>
+                <dd>{{ order.paid_at or 'Chưa thanh toán' }}</dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="card">
+        <div class="eyebrow">LICENSE KEY LIÊN KẾT</div>
+        <h2><code class="key">{{ order.license_key }}</code></h2>
+        <dl>
+            <div>
+                <dt>Trạng thái bản quyền</dt>
+                <dd><span class="badge {{ order.license_status }}">{{ license_status_label(order.license_status) }}</span></dd>
+            </div>
+            <div>
+                <dt>Thời điểm kích hoạt</dt>
+                <dd>{{ order.activated_at or 'Chờ thanh toán thành công' }}</dd>
+            </div>
+            <div>
+                <dt>Thời hạn hết hạn</dt>
+                <dd>{{ order.expires_at or 'Chờ xác nhận thanh toán' }}</dd>
+            </div>
+            <div>
+                <dt>Giới hạn thiết bị</dt>
+                <dd><strong>{{ order.max_devices }}</strong> máy trạm</dd>
+            </div>
+            <div>
+                <dt>Người liên hệ</dt>
+                <dd>{{ order.contact_name }}{% if order.contact_email %} · <a href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a>{% endif %}</dd>
+            </div>
+            <div>
+                <dt>Ghi chú triển khai</dt>
+                <dd>{{ order.notes or 'Không có ghi chú' }}</dd>
+            </div>
+        </dl>
+    </article>
 </section>
-<section class="card"><div class="section-heading"><div><div class="eyebrow">NHẬT KÝ WEBHOOK</div><h2>10 webhook gần nhất</h2></div></div><div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Trạng thái</th><th>Thông điệp</th></tr></thead><tbody>{% for event in events %}<tr><td>{{ event.received_at }}</td><td><span class="badge {{ event.processing_status }}">{{ event.processing_status }}</span></td><td>{{ event.message }}</td></tr>{% else %}<tr><td colspan="3" class="empty">Chưa có webhook.</td></tr>{% endfor %}</tbody></table></div></section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">NHẬT KÝ WEBHOOK SEPAY</div>
+            <h2>Đối soát webhook gần nhất (10 sự kiện)</h2>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 220px;">Thời gian nhận</th>
+                    <th style="width: 180px;">Trạng thái xử lý</th>
+                    <th>Thông điệp đối soát</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td><small style="font-size: 12px; color: var(--ink);">{{ event.received_at }}</small></td>
+                    <td><span class="badge {{ event.processing_status }}">{{ event.processing_status }}</span></td>
+                    <td>{{ event.message }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="empty">Chưa có webhook nào được ghi nhận cho đơn hàng này.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

@@ -2,16 +2,36 @@
 {% block title %}Đăng nhập · License Admin{% endblock %}
 {% block content %}
 <section class="login-card">
-    <div class="admin-login-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M2.5 12h4l2.1-5.4 3.55 10.8 2.3-6.1 1.7 2.7h7.35"/></svg></div>
+    <div class="admin-login-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M2.5 12h4l2.1-5.4 3.55 10.8 2.3-6.1 1.7 2.7h7.35"/>
+        </svg>
+    </div>
     <div class="eyebrow">ICU PREDICT · COMMAND CENTER</div>
     <h1>Quản trị License Key</h1>
-    <p>Trang nội bộ để tạo license, quản lý đơn hàng và xác nhận thanh toán.</p>
+    <p>Trang quản trị nội bộ dành cho việc tạo khóa bản quyền, kiểm soát đơn hàng và đối soát thanh toán tự động.</p>
     <form method="post" class="form-stack">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label>Tên đăng nhập<input name="username" autocomplete="username" required autofocus></label>
-        <label class="password-field">Mật khẩu<input id="admin-password" type="password" name="password" autocomplete="current-password" required><button type="button" class="password-toggle" aria-label="Hiện mật khẩu" onclick="const p=document.getElementById('admin-password');p.type=p.type==='password'?'text':'password';this.classList.toggle('visible',p.type==='text')"><span>◉</span></button></label>
-        <button class="button primary" type="submit">Đăng nhập</button>
+        <label>
+            Tên đăng nhập
+            <input name="username" autocomplete="username" required autofocus placeholder="Nhập username quản trị">
+        </label>
+        <label class="password-field">
+            Mật khẩu
+            <input id="admin-password" type="password" name="password" autocomplete="current-password" required placeholder="Nhập mật khẩu">
+            <button type="button" class="password-toggle" aria-label="Hiện mật khẩu" onclick="const p=document.getElementById('admin-password');p.type=p.type==='password'?'text':'password';this.classList.toggle('visible',p.type==='text')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+        </label>
+        <button class="button primary" type="submit" style="width: 100%; justify-content: center; min-height: 44px; margin-top: 6px;">
+            <span>Đăng nhập Command Center</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+        </button>
     </form>
-    <small>Chế độ demo cục bộ dùng tài khoản cấu hình trong biến môi trường.</small>
+    <small>Chế độ demo cục bộ dùng tài khoản cấu hình trong biến môi trường hệ thống.</small>
 </section>
 {% endblock %}

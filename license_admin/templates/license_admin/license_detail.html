@@ -1,7 +1,128 @@
 {% extends 'license_admin/layout.html' %}
-{% block title %}{{ license_row.license_key }} · License Admin{% endblock %}
+{% block title %}{{ license_row.license_key }} · Chi tiết License{% endblock %}
+{% block breadcrumb_title %}Chi tiết Key{% endblock %}
 {% block content %}
-<header class="page-header"><div><div class="eyebrow">LICENSE KEY</div><h1><code class="key">{{ license_row.license_key }}</code></h1><p>{{ license_row.organization_name }} · {{ plan_name(license_row.plan_code) }}</p></div><div class="header-actions"><a class="button secondary" href="{{ url_for('license_portal.order_detail', order_id=license_row.order_id) }}">Xem đơn hàng</a>{% if license_row.status == 'active' %}<form method="post" action="{{ url_for('license_portal.revoke_license', license_id=license_row.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button danger" type="submit">Thu hồi key</button></form>{% endif %}</div></header>
-<section class="detail-grid"><article class="card"><div class="eyebrow">TRẠNG THÁI</div><h2><span class="badge {{ license_row.status }}">{{ license_status_label(license_row.status) }}</span></h2><dl><dt>Kích hoạt lúc</dt><dd>{{ license_row.activated_at or 'Chưa kích hoạt' }}</dd><dt>Hết hạn</dt><dd>{{ license_row.expires_at or 'Chờ thanh toán' }}</dd><dt>Số thiết bị</dt><dd>{{ license_row.max_devices }}</dd><dt>Giá trị đơn</dt><dd>{{ format_vnd(license_row.amount_vnd) }}</dd></dl></article><article class="card"><div class="eyebrow">KHÁCH HÀNG</div><h2>{{ license_row.organization_name }}</h2><dl><dt>Người liên hệ</dt><dd>{{ license_row.contact_name }}</dd><dt>Email</dt><dd>{{ license_row.contact_email or '—' }}</dd><dt>Ghi chú nội bộ</dt><dd>{{ license_row.notes or '—' }}</dd><dt>Nội dung CK</dt><dd><code>{{ license_row.transfer_content }}</code></dd></dl></article></section>
-<section class="card"><div class="section-heading"><div><div class="eyebrow">NHẬT KÝ XÁC THỰC</div><h2>Lần kiểm tra từ ICU Predict</h2></div></div><div class="table-wrap"><table><thead><tr><th>Thời gian</th><th>Client</th><th>Phiên bản app</th><th>Kết quả</th></tr></thead><tbody>{% for check in validations %}<tr><td>{{ check.checked_at }}</td><td>{{ check.client_id or '—' }}</td><td>{{ check.app_version or '—' }}</td><td>{{ check.result }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Chưa có yêu cầu kiểm tra key nào.</td></tr>{% endfor %}</tbody></table></div></section>
+<header class="page-header">
+    <div>
+        <div class="eyebrow">KHÓA BẢN QUYỀN HỆ THỐNG</div>
+        <h1><code class="key" style="font-size: 20px;">{{ license_row.license_key }}</code></h1>
+        <p>{{ license_row.organization_name }} · Gói {{ plan_name(license_row.plan_code) }}</p>
+    </div>
+    <div class="header-actions">
+        <a class="button secondary" href="{{ url_for('license_portal.license_list') }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span>Danh sách</span>
+        </a>
+        <a class="button secondary" href="{{ url_for('license_portal.order_detail', order_id=license_row.order_id) }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Xem đơn hàng</span>
+        </a>
+        {% if license_row.status == 'active' %}
+        <form method="post" action="{{ url_for('license_portal.revoke_license', license_id=license_row.id) }}" onsubmit="return confirm('Bạn có chắc chắn muốn thu hồi license key này không? Khách hàng sẽ không thể tiếp tục xác thực sử dụng phần mềm.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button danger" type="submit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                </svg>
+                <span>Thu hồi bản quyền</span>
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</header>
+
+<section class="detail-grid">
+    <article class="card">
+        <div class="eyebrow">HIỆU LỰC & QUYỀN SỬ DỤNG</div>
+        <div style="margin: 10px 0 20px;">
+            <span class="badge {{ license_row.status }}" style="font-size: 13px; padding: 6px 14px;">
+                {{ license_status_label(license_row.status) }}
+            </span>
+        </div>
+        <dl>
+            <div>
+                <dt>Thời điểm kích hoạt</dt>
+                <dd>{{ license_row.activated_at or 'Chưa kích hoạt' }}</dd>
+            </div>
+            <div>
+                <dt>Thời hạn kết thúc</dt>
+                <dd>{{ license_row.expires_at or 'Chờ thanh toán kích hoạt' }}</dd>
+            </div>
+            <div>
+                <dt>Số lượng thiết bị cho phép</dt>
+                <dd><strong>{{ license_row.max_devices }}</strong> máy trạm lâm sàng</dd>
+            </div>
+            <div>
+                <dt>Giá trị hợp đồng / đơn hàng</dt>
+                <dd><strong style="color: var(--navy-900);">{{ format_vnd(license_row.amount_vnd) }}</strong></dd>
+            </div>
+        </dl>
+    </article>
+
+    <article class="card">
+        <div class="eyebrow">TỔ CHỨC & KHÁCH HÀNG</div>
+        <h2>{{ license_row.organization_name }}</h2>
+        <dl>
+            <div>
+                <dt>Người đại diện</dt>
+                <dd>{{ license_row.contact_name }}</dd>
+            </div>
+            <div>
+                <dt>Hòm thư điện tử</dt>
+                <dd>{% if license_row.contact_email %}<a href="mailto:{{ license_row.contact_email }}">{{ license_row.contact_email }}</a>{% else %}—{% endif %}</dd>
+            </div>
+            <div>
+                <dt>Cú pháp chuyển khoản liên kết</dt>
+                <dd><code>{{ license_row.transfer_content }}</code></dd>
+            </div>
+            <div>
+                <dt>Ghi chú nội bộ</dt>
+                <dd>{{ license_row.notes or '—' }}</dd>
+            </div>
+        </dl>
+    </article>
+</section>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">NHẬT KÝ KIỂM TRA BẢN QUYỀN</div>
+            <h2>Lịch sử các lần ICU Predict gọi API xác thực key</h2>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 220px;">Thời gian gọi</th>
+                    <th style="width: 200px;">Mã máy Client ID</th>
+                    <th style="width: 160px;">Phiên bản App</th>
+                    <th>Kết quả kiểm tra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for check in validations %}
+                <tr>
+                    <td><small style="font-size: 12px; color: var(--ink);">{{ check.checked_at }}</small></td>
+                    <td><code>{{ check.client_id or '—' }}</code></td>
+                    <td>{{ check.app_version or '—' }}</td>
+                    <td>
+                        <span class="badge {{ 'active' if check.result == 'valid' else 'expired' }}">
+                            {{ check.result }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="empty">Chưa có yêu cầu xác thực API nào từ ứng dụng lâm sàng cho key này.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

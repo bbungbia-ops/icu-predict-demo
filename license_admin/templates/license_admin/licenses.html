@@ -1,8 +1,73 @@
 {% extends 'license_admin/layout.html' %}
 {% block title %}License keys · License Admin{% endblock %}
+{% block breadcrumb_title %}License keys{% endblock %}
 {% block content %}
-<header class="page-header"><div><div class="eyebrow">LICENSE KEYS</div><h1>Danh sách license</h1><p>Key hết hạn được tự cập nhật khi trang được mở hoặc khi ICU Predict kiểm tra license.</p></div><a class="button primary" href="{{ url_for('license_portal.order_create') }}">Tạo license mới</a></header>
-<section class="card"><div class="table-wrap"><table><thead><tr><th>License key</th><th>Tổ chức</th><th>Gói</th><th>Trạng thái</th><th>Hết hạn</th><th>Thiết bị</th><th></th></tr></thead><tbody>{% for license in licenses %}<tr>
-<td><code>{{ license.license_key }}</code></td><td>{{ license.organization_name }}</td><td>{{ plan_name(license.plan_code) }}</td><td><span class="badge {{ license.status }}">{{ license_status_label(license.status) }}</span></td><td>{{ license.expires_at or 'Chờ thanh toán' }}</td><td>{{ license.max_devices }}</td><td><a href="{{ url_for('license_portal.license_detail', license_id=license.id) }}">Chi tiết</a></td>
-</tr>{% else %}<tr><td colspan="7" class="empty">Chưa có license key.</td></tr>{% endfor %}</tbody></table></div></section>
+<header class="page-header">
+    <div>
+        <div class="eyebrow">QUẢN TRỊ BẢN QUYỀN</div>
+        <h1>Danh sách License Key</h1>
+        <p>Theo dõi tình trạng hiệu lực của các khóa bản quyền phần mềm ICU Predict được cấp cho các cơ sở y tế.</p>
+    </div>
+    <div class="header-actions">
+        <a class="button primary" href="{{ url_for('license_portal.order_create') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Tạo license mới</span>
+        </a>
+    </div>
+</header>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">KHO KHÓA BẢN QUYỀN</div>
+            <h2>Tất cả License Keys ({{ licenses|length }})</h2>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>License Key</th>
+                    <th>Tổ chức / Bệnh viện</th>
+                    <th>Gói dịch vụ</th>
+                    <th>Trạng thái</th>
+                    <th>Thời hạn hiệu lực</th>
+                    <th>Thiết bị</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for license in licenses %}
+                <tr>
+                    <td><code class="key">{{ license.license_key }}</code></td>
+                    <td><strong>{{ license.organization_name }}</strong></td>
+                    <td>{{ plan_name(license.plan_code) }}</td>
+                    <td>
+                        <span class="badge {{ license.status }}">
+                            {{ license_status_label(license.status) }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if license.expires_at %}
+                        <span style="font-weight: 600;">{{ license.expires_at }}</span>
+                        {% else %}
+                        <small style="color: var(--muted);">Chờ kích hoạt</small>
+                        {% endif %}
+                    </td>
+                    <td><strong>{{ license.max_devices }}</strong> máy</td>
+                    <td style="text-align: right;">
+                        <a href="{{ url_for('license_portal.license_detail', license_id=license.id) }}">Chi tiết ›</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty">Chưa có license key nào trong hệ thống.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

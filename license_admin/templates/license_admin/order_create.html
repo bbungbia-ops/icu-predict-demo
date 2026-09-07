@@ -1,24 +1,83 @@
 {% extends 'license_admin/layout.html' %}
 {% block title %}Tạo license · License Admin{% endblock %}
+{% block breadcrumb_title %}Tạo license mới{% endblock %}
 {% block content %}
-<header class="page-header"><div><div class="eyebrow">TẠO ĐƠN HÀNG</div><h1>Tạo license key mới</h1><p>Key được sinh ngay nhưng chỉ được kích hoạt sau khi thanh toán được xác nhận.</p></div></header>
+<header class="page-header">
+    <div>
+        <div class="eyebrow">KHỞI TẠO BẢN QUYỀN</div>
+        <h1>Tạo license key & đơn hàng mới</h1>
+        <p>Mã khóa license được tạo sẵn tức thì ở trạng thái chờ kích hoạt, sẽ tự động mở quyền khi SePay ghi nhận thanh toán hợp lệ.</p>
+    </div>
+</header>
+
 <form method="post" class="card form-card" id="order-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-grid">
-        <label>Gói dịch vụ<select name="plan_code" id="plan_code" required>{% for code, plan in plan_catalog.items() %}<option value="{{ code }}">{{ plan.name }} · {% if plan.amount_vnd %}{{ format_vnd_millions(plan.monthly_amount_vnd) }}/tháng · {{ payment_term_label(plan) }}{% else %}Báo giá và thời hạn theo hợp đồng{% endif %}</option>{% endfor %}</select></label>
-        <label>Số thiết bị được phép<input type="number" name="max_devices" min="1" max="500" value="1" required></label>
-        <label>Tên tổ chức<input name="organization_name" maxlength="150" required placeholder="Ví dụ: Bệnh viện Demo"></label>
-        <label>Người liên hệ<input name="contact_name" maxlength="100" required placeholder="Ví dụ: Nguyễn Minh Anh"></label>
-        <label>Email liên hệ<input type="email" name="contact_email" maxlength="150" placeholder="contact@example.com"></label>
-        <label id="enterprise-amount" class="enterprise-only">Giá hợp đồng (VND)<input type="number" name="enterprise_amount_vnd" min="1" placeholder="Ví dụ: 300000000"></label>
-        <label id="enterprise-days" class="enterprise-only">Thời hạn (ngày)<input type="number" name="enterprise_validity_days" min="1" max="1095" placeholder="Ví dụ: 365"></label>
-        <label class="full">Ghi chú nội bộ<textarea name="notes" maxlength="1000" placeholder="Phạm vi triển khai, điều khoản hoặc ghi chú đối soát..."></textarea></label>
+        <label class="full">
+            Gói dịch vụ
+            <select name="plan_code" id="plan_code" required>
+                {% for code, plan in plan_catalog.items() %}
+                <option value="{{ code }}">
+                    {{ plan.name }} · {% if plan.amount_vnd %}{{ format_vnd_millions(plan.monthly_amount_vnd) }}/tháng · {{ payment_term_label(plan) }}{% else %}Báo giá và thời hạn tùy chỉnh theo hợp đồng{% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Số thiết bị / máy trạm tối đa
+            <input type="number" name="max_devices" min="1" max="500" value="1" required placeholder="1">
+        </label>
+
+        <label>
+            Tên tổ chức / Bệnh viện
+            <input name="organization_name" maxlength="150" required placeholder="Ví dụ: Bệnh viện Đa khoa Quốc tế Demo">
+        </label>
+
+        <label>
+            Người đại diện liên hệ
+            <input name="contact_name" maxlength="100" required placeholder="Ví dụ: BS. Nguyễn Minh Anh">
+        </label>
+
+        <label>
+            Email liên hệ
+            <input type="email" name="contact_email" maxlength="150" placeholder="bacsi@example.com">
+        </label>
+
+        <label id="enterprise-amount" class="enterprise-only">
+            Giá trị hợp đồng (VND)
+            <input type="number" name="enterprise_amount_vnd" min="1" placeholder="Ví dụ: 300000000">
+        </label>
+
+        <label id="enterprise-days" class="enterprise-only">
+            Thời hạn bản quyền (ngày)
+            <input type="number" name="enterprise_validity_days" min="1" max="1095" placeholder="Ví dụ: 365">
+        </label>
+
+        <label class="full">
+            Ghi chú nội bộ
+            <textarea name="notes" maxlength="1000" placeholder="Phạm vi triển khai, khoa phòng ICU áp dụng hoặc điều khoản hợp đồng nội bộ..."></textarea>
+        </label>
     </div>
-    <div class="form-actions"><a class="button secondary" href="{{ url_for('license_portal.order_list') }}">Hủy</a><button class="button primary" type="submit">Tạo đơn hàng và key</button></div>
+
+    <div class="form-actions">
+        <a class="button secondary" href="{{ url_for('license_portal.order_list') }}">Hủy bỏ</a>
+        <button class="button primary" type="submit">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+            </svg>
+            <span>Khởi tạo đơn hàng & License Key</span>
+        </button>
+    </div>
 </form>
+
 <script>
 const planSelector = document.getElementById('plan_code');
-const toggleEnterprise = () => document.querySelectorAll('.enterprise-only').forEach(el => el.classList.toggle('shown', planSelector.value === 'enterprise'));
-planSelector.addEventListener('change', toggleEnterprise); toggleEnterprise();
+const toggleEnterprise = () => {
+    const isEnterprise = planSelector.value === 'enterprise';
+    document.querySelectorAll('.enterprise-only').forEach(el => el.classList.toggle('shown', isEnterprise));
+};
+planSelector.addEventListener('change', toggleEnterprise);
+toggleEnterprise();
 </script>
 {% endblock %}

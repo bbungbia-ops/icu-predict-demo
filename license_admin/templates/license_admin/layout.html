@@ -3,58 +3,133 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Cổng quản trị license key ICU Predict">
-    <meta name="theme-color" content="#0b1326">
+    <meta name="description" content="Cổng quản trị license key ICU Predict — Commercial Command Center">
+    <meta name="theme-color" content="#2563eb">
     <title>{% block title %}License Admin · ICU Predict{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/license_admin.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><path d='M80 50H65L55 80L35 20L25 50H20' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 </head>
 <body>
 {% if session.get('admin_id') %}
 <div class="shell">
-    <button class="admin-mobile-toggle" id="adminMobileToggle" type="button" aria-controls="adminSidebar" aria-expanded="false">
-        <span></span><span></span><span></span><b>Menu</b>
-    </button>
     <aside class="sidebar" id="adminSidebar">
         <a class="brand" href="{{ url_for('license_portal.dashboard') }}">
-            <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M2.5 12h4l2.1-5.4 3.55 10.8 2.3-6.1 1.7 2.7h7.35"/></svg></span>
-            <span><strong>ICU Predict</strong><small>Command Center</small></span>
+            <span class="brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M2.5 12h4l2.1-5.4 3.55 10.8 2.3-6.1 1.7 2.7h7.35"/>
+                </svg>
+            </span>
+            <div class="brand-text">
+                <strong>ICU Predict</strong>
+                <small>Command Center</small>
+            </div>
         </a>
+
         <div class="sidebar-label">Điều hành thương mại</div>
         <nav>
-            <a href="{{ url_for('license_portal.dashboard') }}" class="{{ 'active' if request.endpoint == 'license_portal.dashboard' else '' }}">Tổng quan</a>
-            <a href="{{ url_for('license_portal.order_list') }}" class="{{ 'active' if request.endpoint in ('license_portal.order_list', 'license_portal.order_detail') else '' }}">Đơn hàng</a>
-            <a href="{{ url_for('license_portal.order_create') }}" class="{{ 'active' if request.endpoint == 'license_portal.order_create' else '' }}">Tạo license mới</a>
-            <a href="{{ url_for('license_portal.license_list') }}" class="{{ 'active' if request.endpoint == 'license_portal.license_list' else '' }}">License keys</a>
+            <a href="{{ url_for('license_portal.dashboard') }}" class="{{ 'active' if request.endpoint == 'license_portal.dashboard' else '' }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>
+                </svg>
+                <span>Tổng quan</span>
+            </a>
+            <a href="{{ url_for('license_portal.order_list') }}" class="{{ 'active' if request.endpoint in ('license_portal.order_list', 'license_portal.order_detail') else '' }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span>Đơn hàng</span>
+            </a>
+            <a href="{{ url_for('license_portal.order_create') }}" class="{{ 'active' if request.endpoint == 'license_portal.order_create' else '' }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                <span>Tạo license mới</span>
+            </a>
+            <a href="{{ url_for('license_portal.license_list') }}" class="{{ 'active' if request.endpoint in ('license_portal.license_list', 'license_portal.license_detail') else '' }}">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                </svg>
+                <span>License keys</span>
+            </a>
         </nav>
+
         <div class="sidebar-foot">
             <span class="admin-avatar">{{ session.get('admin_username', 'A')[:1]|upper }}</span>
-            <span><b>{{ session.get('admin_username') }}</b><small>Quản trị viên</small></span>
+            <div class="sidebar-foot-meta">
+                <b>{{ session.get('admin_username') }}</b>
+                <small>Quản trị viên</small>
+            </div>
             <form method="post" action="{{ url_for('license_portal.logout') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="link-button">Đăng xuất</button>
+                <button type="submit" class="link-button" title="Đăng xuất">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span>Thoát</span>
+                </button>
             </form>
         </div>
     </aside>
     <button class="admin-sidebar-backdrop" id="adminSidebarBackdrop" type="button" aria-label="Đóng menu"></button>
-    <main class="content">
+
+    <div class="main-wrapper">
+        <header class="top-header">
+            <div class="top-header-left">
+                <button class="admin-mobile-toggle" id="adminMobileToggle" type="button" aria-controls="adminSidebar" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                    <span>Menu</span>
+                </button>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-root">ICU PREDICT</span>
+                    <span class="breadcrumb-sep">›</span>
+                    <span class="breadcrumb-root">LICENSE ADMIN</span>
+                    <span class="breadcrumb-sep">›</span>
+                    <span class="breadcrumb-current">{% block breadcrumb_title %}Tổng quan{% endblock %}</span>
+                </div>
+            </div>
+            <div class="top-header-right">
+                <div class="status-pill" title="Hệ thống xác thực license đang hoạt động">
+                    <span class="status-pill-dot"></span>
+                    <span>Live Center</span>
+                </div>
+                <div class="admin-avatar" style="width:34px;height:34px;font-size:12px;">{{ session.get('admin_username', 'A')[:1]|upper }}</div>
+            </div>
+        </header>
+
+        <main class="content">
 {% else %}
 <main class="login-main">
 {% endif %}
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         <div class="flash-stack">
-            {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    {% if category == 'error' %}
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    {% else %}
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    {% endif %}
+                </svg>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
         </div>
         {% endif %}
         {% endwith %}
+
         {% block content %}{% endblock %}
+
 {% if session.get('admin_id') %}
-    </main>
+        </main>
+    </div>
 </div>
 {% else %}
 </main>
 {% endif %}
+
 {% if session.get('admin_id') %}
 <script>
 (() => {
@@ -62,10 +137,20 @@
     const sidebar = document.getElementById('adminSidebar');
     const backdrop = document.getElementById('adminSidebarBackdrop');
     if (!toggle || !sidebar || !backdrop) return;
-    const close = () => { sidebar.classList.remove('open'); document.body.classList.remove('admin-nav-open'); toggle.setAttribute('aria-expanded', 'false'); };
-    toggle.addEventListener('click', () => { const opening = !sidebar.classList.contains('open'); sidebar.classList.toggle('open', opening); document.body.classList.toggle('admin-nav-open', opening); toggle.setAttribute('aria-expanded', String(opening)); });
+    const close = () => {
+        sidebar.classList.remove('open');
+        document.body.classList.remove('admin-nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+    const open = () => {
+        sidebar.classList.add('open');
+        document.body.classList.add('admin-nav-open');
+        toggle.setAttribute('aria-expanded', 'true');
+    };
+    toggle.addEventListener('click', () => sidebar.classList.contains('open') ? close() : open());
     backdrop.addEventListener('click', close);
     sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 })();
 </script>
 {% endif %}

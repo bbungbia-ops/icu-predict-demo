@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="ICU Predict - nguyên mẫu nghiên cứu hỗ trợ điều phối đánh giá">
-    <meta name="theme-color" content="#0c1526">
+    <meta name="theme-color" content="#2563eb">
     <title>{% block title %}ICU Predict{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23009e89'/><path d='M80 50H65L55 80L35 20L25 50H20' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232563eb'/><path d='M80 50H65L55 80L35 20L25 50H20' fill='none' stroke='white' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     {% block head %}{% endblock %}
 </head>
@@ -29,24 +29,20 @@
                     </div>
                     <div>
                         <h2>ICU Predict</h2>
-                        <span>Điều phối ưu tiên rà soát lâm sàng</span>
+                        <span>Clinical OS</span>
                     </div>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
                 <div class="nav-section">
-                    <div class="nav-section-title">Tổng quan</div>
+                    <div class="nav-section-title">Lâm sàng</div>
                     <a href="{{ url_for('dashboard.index') }}" class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}" id="nav-dashboard">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>
                         </svg>
                         Điều phối đánh giá
                     </a>
-                </div>
-
-                <div class="nav-section">
-                    <div class="nav-section-title">Quản lý</div>
                     <a href="{{ url_for('patients.list_patients') }}" class="nav-item {% if 'patients' in request.endpoint %}active{% endif %}" id="nav-patients">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -56,7 +52,7 @@
                 </div>
 
                 <div class="nav-section">
-                    <div class="nav-section-title">Nghiên cứu & đánh giá</div>
+                    <div class="nav-section-title">Nghiên cứu</div>
                     <a href="{{ url_for('predictions.predict_form') }}" class="nav-item {% if request.endpoint == 'predictions.predict_form' %}active{% endif %}" id="nav-predict">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
@@ -109,6 +105,24 @@
 
         <!-- Main -->
         <main class="main-content">
+            <!-- Top Header Bar -->
+            <div class="top-header">
+                <div class="top-header-left">
+                    <div class="top-header-breadcrumb">
+                        <span class="breadcrumb-section">ICU Predict</span>
+                        <span class="breadcrumb-separator">›</span>
+                        <span class="breadcrumb-current">{% block header_title %}Dashboard{% endblock %}</span>
+                    </div>
+                </div>
+                <div class="top-header-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Tìm kiếm bệnh nhân, đánh giá..." id="global-search">
+                </div>
+                <div class="top-header-right">
+                    <div class="header-avatar">{{ session.get('full_name', 'A')[0] }}</div>
+                </div>
+            </div>
+
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div class="flash-messages">

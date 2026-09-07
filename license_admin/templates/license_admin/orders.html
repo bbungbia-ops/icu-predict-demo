@@ -1,13 +1,72 @@
 {% extends 'license_admin/layout.html' %}
 {% block title %}Đơn hàng · License Admin{% endblock %}
+{% block breadcrumb_title %}Đơn hàng{% endblock %}
 {% block content %}
-<header class="page-header"><div><div class="eyebrow">ĐƠN HÀNG</div><h1>Quản lý đơn hàng</h1><p>Mỗi đơn hàng tạo đúng một license key chờ thanh toán.</p></div><a class="button primary" href="{{ url_for('license_portal.order_create') }}">Tạo đơn hàng</a></header>
-<section class="card"><div class="table-wrap"><table><thead><tr><th>Mã đơn</th><th>Tổ chức</th><th>Gói</th><th>Nội dung CK</th><th>Giá trị</th><th>Thanh toán</th><th>License</th><th></th></tr></thead><tbody>
-{% for order in orders %}<tr>
-    <td><strong>{{ order.order_code }}</strong><small>{{ order.created_at }}</small></td><td>{{ order.organization_name }}</td><td>{{ plan_name(order.plan_code) }}</td>
-    <td><code>{{ order.transfer_content }}</code></td><td>{{ format_vnd(order.amount_vnd) }}</td>
-    <td><span class="badge {{ order.payment_status }}">{{ order_status_label(order.payment_status) }}</span></td>
-    <td><code>{{ order.license_key }}</code></td><td><a href="{{ url_for('license_portal.order_detail', order_id=order.id) }}">Chi tiết</a></td>
-</tr>{% else %}<tr><td colspan="8" class="empty">Chưa có đơn hàng nào.</td></tr>{% endfor %}
-</tbody></table></div></section>
+<header class="page-header">
+    <div>
+        <div class="eyebrow">ĐIỀU HÀNH THƯƠNG MẠI</div>
+        <h1>Quản lý đơn hàng</h1>
+        <p>Theo dõi toàn bộ đơn hàng, đối soát mã chuyển khoản ngân hàng và kiểm tra trạng thái kích hoạt license key.</p>
+    </div>
+    <div class="header-actions">
+        <a class="button primary" href="{{ url_for('license_portal.order_create') }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Tạo đơn hàng mới</span>
+        </a>
+    </div>
+</header>
+
+<section class="card">
+    <div class="section-heading">
+        <div>
+            <div class="eyebrow">DANH SÁCH GIAO DỊCH</div>
+            <h2>Tất cả đơn hàng trong hệ thống ({{ orders|length }})</h2>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Tổ chức / Khách hàng</th>
+                    <th>Gói dịch vụ</th>
+                    <th>Nội dung chuyển khoản</th>
+                    <th>Giá trị</th>
+                    <th>Thanh toán</th>
+                    <th>License Key</th>
+                    <th style="text-align: right;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>
+                        <strong>{{ order.order_code }}</strong>
+                        <small>{{ order.created_at }}</small>
+                    </td>
+                    <td><strong>{{ order.organization_name }}</strong></td>
+                    <td>{{ plan_name(order.plan_code) }}</td>
+                    <td><code>{{ order.transfer_content }}</code></td>
+                    <td><strong style="color: var(--navy-900);">{{ format_vnd(order.amount_vnd) }}</strong></td>
+                    <td>
+                        <span class="badge {{ order.payment_status }}">
+                            {{ order_status_label(order.payment_status) }}
+                        </span>
+                    </td>
+                    <td><code class="key">{{ order.license_key }}</code></td>
+                    <td style="text-align: right;">
+                        <a href="{{ url_for('license_portal.order_detail', order_id=order.id) }}">Chi tiết ›</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty">Chưa có đơn hàng nào trong hệ thống.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

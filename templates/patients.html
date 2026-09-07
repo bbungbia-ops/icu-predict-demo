@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Bệnh nhân - ICU Predict{% endblock %}
+{% block header_title %}Quản lý bệnh nhân{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -95,7 +96,7 @@
                             <div class="empty-state">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                                 <h3>Chưa có bệnh nhân</h3>
-                                <p>{% if trial_status.is_trial %}Tự nhập ca đầu tiên để trải nghiệm quy trình dùng thử.{% else %}Bấm “Thêm bệnh nhân” để bắt đầu.{% endif %}</p>
+                                <p>{% if trial_status.is_trial %}Tự nhập ca đầu tiên để trải nghiệm quy trình dùng thử.{% else %}Bấm "Thêm bệnh nhân" để bắt đầu.{% endif %}</p>
                             </div>
                         </td>
                     </tr>
