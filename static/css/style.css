@@ -218,6 +218,12 @@ a:hover {
     box-shadow: var(--shadow-xl);
 }
 
+/* The cover image is intentionally repeated in the mobile-only login header.
+   Keeping it beside the brand avoids stacking a large hero above the form. */
+.login-mobile-visual {
+    display: none;
+}
+
 .login-form-side {
     width: 480px;
     min-width: 420px;
@@ -3004,12 +3010,15 @@ select.form-control {
     
     /* Login responsive */
     .login-page {
-        flex-direction: column;
+        align-items: center;
+        background:
+            radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.12), transparent 34%),
+            linear-gradient(180deg, #f4f8ff 0%, #ffffff 42%);
+        padding: 20px 16px;
     }
     
     .login-hero {
-        padding: 40px 24px;
-        min-height: 280px;
+        display: none;
     }
     
     .login-hero-content h2 {
@@ -3027,7 +3036,77 @@ select.form-control {
     .login-form-side {
         width: 100%;
         min-width: unset;
-        padding: 32px 24px;
+        min-height: calc(100dvh - 40px);
+        padding: 24px;
+        align-items: center;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 24px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.10);
+        background: rgba(255, 255, 255, 0.96);
+    }
+
+    .login-card {
+        max-width: 420px;
+    }
+
+    .login-logo {
+        position: relative;
+        min-height: 104px;
+        padding-right: 112px;
+        margin-bottom: 24px;
+    }
+
+    .login-mobile-visual {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 96px;
+        height: 116px;
+        overflow: hidden;
+        border: 1px solid rgba(191, 219, 254, 0.9);
+        border-radius: 16px;
+        box-shadow: 0 10px 24px rgba(30, 58, 95, 0.14);
+    }
+
+    .login-mobile-visual img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 58% 12%;
+    }
+
+    .login-logo .logo-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 10px;
+        border-radius: 13px;
+    }
+
+    .login-logo .logo-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .login-logo h1 {
+        font-size: 1.45rem;
+    }
+
+    .login-logo p {
+        font-size: 0.8rem;
+        line-height: 1.45;
+    }
+
+    .login-card .form-group {
+        margin-bottom: 16px;
+    }
+
+    .login-card .form-control {
+        min-height: 46px;
+    }
+
+    .login-card .btn-lg {
+        min-height: 48px;
     }
 }
 
@@ -3039,6 +3118,37 @@ select.form-control {
     .login-hero-stats {
         flex-direction: column;
         gap: 12px;
+    }
+
+    .login-page {
+        padding: 12px;
+    }
+
+    .login-form-side {
+        min-height: calc(100dvh - 24px);
+        padding: 22px 18px;
+        border-radius: 20px;
+    }
+
+    .login-logo {
+        min-height: 92px;
+        padding-right: 94px;
+        margin-bottom: 20px;
+    }
+
+    .login-mobile-visual {
+        width: 80px;
+        height: 96px;
+        border-radius: 14px;
+    }
+
+    .login-divider {
+        margin: 18px 0;
+    }
+
+    .login-secondary-action {
+        margin-top: 12px;
+        font-size: 0.78rem;
     }
     
     .pilot-feedback-fields {
