@@ -56,8 +56,27 @@
     </section>
 
     <section class="card trend-readiness-card">
-        <div class="card-header"><div><div class="eyebrow">XU HƯỚNG DỮ LIỆU · PILOT</div><h3>Khung theo dõi 6–12–24 giờ</h3></div><span class="data-state caution">Chưa đủ chuỗi thời gian</span></div>
-        <div class="card-body"><p class="trend-readiness-copy">Bản ghi này hiện dùng thông số tại một thời điểm. Hệ thống không suy diễn xu hướng khi chưa có dữ liệu nối tiếp đã được kiểm tra.</p><div class="trend-window-grid"><div><strong>06 giờ</strong><span>Điểm thu thập kế tiếp</span></div><div><strong>12 giờ</strong><span>Đối chiếu biến động</span></div><div><strong>24 giờ</strong><span>Rà soát diễn biến cùng bác sĩ</span></div></div><p class="trend-readiness-footnote">Trong Pilot, các mốc này chỉ được kích hoạt sau khi xác nhận nguồn dữ liệu, đơn vị đo và thời điểm ghi nhận.</p></div>
+        <div class="card-header"><div><div class="eyebrow">XU HƯỚNG DỮ LIỆU · PILOT</div><h3>Đối chiếu bản ghi 6–12–24 giờ</h3></div><span class="data-state {{ 'ready' if trend_summary.available else 'caution' }}">{{ 'Có dữ liệu đối chiếu' if trend_summary.available else 'Chưa đủ chuỗi thời gian' }}</span></div>
+        <div class="card-body">
+            {% if trend_summary.available %}
+            <p class="trend-readiness-copy">Mẫu hiện tại lấy lúc {{ trend_summary.current_time }}. Mỗi ô so sánh với mẫu sớm nhất đang có trong cửa sổ tương ứng và luôn ghi thời lượng thực tế.</p>
+            {% else %}
+            <p class="trend-readiness-copy">{{ trend_summary.reason }}</p>
+            {% endif %}
+            <div class="trend-window-grid">
+                {% for window in trend_summary.windows %}
+                <div class="trend-window {{ 'available' if window.available else 'unavailable' }}"><strong>{{ '%02d'|format(window.hours) }} giờ</strong>
+                    {% if window.available %}<span>{{ window.sample_count }} mẫu · cách {{ window.observed_hours }} giờ</span><small>Mốc gốc: {{ window.baseline_time }}</small><ul>{% for change in window.changes %}<li>{{ change.label }}: <b>{{ '+' if change.delta > 0 else '' }}{{ change.delta }}{{ ' ' + change.unit if change.unit else '' }}</b></li>{% endfor %}</ul>{% else %}<span>{{ window.reason }}</span>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <p class="trend-readiness-footnote">Đây là chênh lệch của dữ liệu đã nhập, không phải dự báo diễn biến, đánh giá cải thiện/xấu đi hay khuyến nghị điều trị. Bác sĩ phải xác minh nguồn, đơn vị đo và bối cảnh trước khi dùng để rà soát.</p>
+        </div>
+    </section>
+
+    <section class="card model-evidence-card">
+        <div class="card-header"><div><div class="eyebrow">BẰNG CHỨNG MÔ HÌNH</div><h3>Trạng thái xác thực</h3></div><span class="data-state caution">{{ model_evidence.status }}</span></div>
+        <div class="card-body"><div class="model-evidence-grid"><div><span>Outcome</span><strong>{{ model_evidence.target_definition }}</strong></div><div><span>Mốc dự báo</span><strong>{{ model_evidence.prediction_horizon }}</strong></div><div><span>Chỉ số hiệu năng</span><strong>{{ model_evidence.metrics_state }}</strong></div></div><p class="trend-readiness-footnote">Bước tiếp theo: {{ model_evidence.next_step }}</p></div>
     </section>
 
     {% if not prediction.acknowledged_at %}
@@ -78,7 +97,7 @@
     {% endif %}
 
     <section class="card">
-        <div class="card-header"><div><div class="eyebrow">RÀ SOÁT DỮ LIỆU ĐẦU VÀO</div><h3>Thông số tại thời điểm tạo bản ghi</h3></div><span class="data-state neutral">Nhập lúc {{ prediction.predicted_at }}</span></div>
+        <div class="card-header"><div><div class="eyebrow">RÀ SOÁT DỮ LIỆU ĐẦU VÀO</div><h3>Thông số tại thời điểm lấy mẫu</h3></div><span class="data-state neutral">{{ prediction.measurement_time or 'Chưa lưu thời điểm lấy mẫu' }}</span></div>
         <div class="card-body"><div class="clinical-input-grid">
             {% for feature in analysis.feature_analysis %}
             <div class="clinical-input-card {{ feature.status }}">

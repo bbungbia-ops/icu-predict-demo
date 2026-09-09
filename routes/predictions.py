@@ -9,6 +9,9 @@ from models.signal_presentation import (
     explain_priority_reasons,
 )
 from models.trial_access import get_trial_status
+from models.trend_analysis import build_trend_summary
+from models.model_governance import evidence_status
+from datetime import datetime, timedelta
 import json
 
 predictions_bp = Blueprint('predictions', __name__)
@@ -43,7 +46,12 @@ def predict_form():
             'error',
         )
         return redirect(url_for('account.subscription'))
-    return render_template('predict.html', patients=patients, trial_status=trial_status)
+    return render_template(
+        'predict.html',
+        patients=patients,
+        trial_status=trial_status,
+        default_measurement_time=datetime.now().strftime('%Y-%m-%dT%H:%M'),
+    )
 
 
 @predictions_bp.route('/predict', methods=['POST'])
@@ -87,7 +95,11 @@ def predict():
         'platelet': request.form.get('platelet'),
         'gcs': request.form.get('gcs'),
     }
+    measurement_time_text = request.form.get('measurement_time', '').strip()
     try:
+        measurement_time = datetime.fromisoformat(measurement_time_text)
+        if measurement_time > datetime.now() + timedelta(minutes=5):
+            raise ValueError('Thời điểm lấy mẫu không thể nằm trong tương lai.')
         result = predictor.predict(**raw_values)
         sofa = float(raw_values['sofa'])
         map_value = float(raw_values['map_value'])
@@ -107,10 +119,10 @@ def predict():
 
     cursor = conn.execute(
         'INSERT INTO predictions (patient_id, organization_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, '
-        'risk_score, risk_level, predicted_by, notes, model_version, model_status, out_of_distribution) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'risk_score, risk_level, measurement_time, predicted_by, notes, model_version, model_status, out_of_distribution) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (patient_id, session.get('organization_id'), sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs,
-         result['risk_score'], result['risk_level'], session.get('user_id'), notes,
+         result['risk_score'], result['risk_level'], measurement_time.isoformat(timespec='minutes'), session.get('user_id'), notes,
          result['model_version'], result['model_status'], int(bool(result['out_of_distribution'])))
     )
     prediction_id = cursor.lastrowid
@@ -136,11 +148,20 @@ def result(prediction_id):
         WHERE pr.id = ? AND pr.organization_id = ?
     ''', (prediction_id, session.get('organization_id'))).fetchone()
 
-    conn.close()
-
     if not prediction:
+        conn.close()
         flash('Không tìm thấy bản ghi đánh giá.', 'error')
         return redirect(url_for('predictions.predict_form'))
+
+    previous_records = conn.execute(
+        '''SELECT id, measurement_time, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs
+           FROM predictions
+           WHERE patient_id = ? AND organization_id = ? AND id <> ?
+           ORDER BY measurement_time DESC
+           LIMIT 100''',
+        (prediction['patient_id'], session.get('organization_id'), prediction_id),
+    ).fetchall() if prediction['patient_id'] else []
+    conn.close()
 
     # Re-run analysis for visualization
     predictor = current_app.config['PREDICTOR']
@@ -157,6 +178,8 @@ def result(prediction_id):
             analysis['feature_analysis'], analysis['signal'], prediction['out_of_distribution']
         ),
         review_outcome_label=describe_review_outcome(prediction['review_outcome']),
+        trend_summary=build_trend_summary(dict(prediction), [dict(record) for record in previous_records]),
+        model_evidence=evidence_status(predictor.metadata),
         analysis_json=json.dumps(analysis)
     )
 

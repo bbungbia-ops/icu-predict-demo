@@ -39,11 +39,16 @@
                     </div>
                     <div class="form-group">
                         <label for="notes">Ghi chú bối cảnh</label>
-                        <textarea id="notes" name="notes" class="form-control" placeholder="Nguồn số liệu, thời điểm lấy mẫu, thông tin cần lưu ý..."></textarea>
+                        <textarea id="notes" name="notes" class="form-control" placeholder="Nguồn số liệu, thông tin cần lưu ý..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="measurement_time">Thời điểm lấy mẫu <span>(bắt buộc)</span></label>
+                        <input type="datetime-local" id="measurement_time" name="measurement_time" class="form-control" value="{{ default_measurement_time }}" required>
+                        <div class="indicator-hint">Dùng thời điểm các chỉ số được lấy, không phải thời điểm bấm lưu. Đây là điều kiện để so sánh chuỗi 6–12–24 giờ.</div>
                     </div>
                 </div>
             </section>
-            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul><div class="time-series-note"><strong>Trạng thái dữ liệu hiện tại</strong><span>Bản demo ghi nhận một thời điểm. Xu hướng 6–12–24 giờ chỉ được phân tích trong Pilot khi có chuỗi dữ liệu hợp lệ.</span></div></div></aside>
+            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul><div class="time-series-note"><strong>Chuỗi 6–12–24 giờ</strong><span>Sau khi có bản ghi cùng bệnh nhân và thời điểm lấy mẫu hợp lệ, hệ thống chỉ hiển thị chênh lệch số học giữa các mẫu; không suy diễn diễn biến lâm sàng.</span></div></div></aside>
         </div>
 
         <section class="card clinical-form-card">

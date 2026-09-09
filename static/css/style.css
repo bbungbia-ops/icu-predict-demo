@@ -1808,6 +1808,44 @@ select.form-control {
     border-radius: var(--border-radius-sm);
 }
 
+.trend-window-grid .trend-window {
+    text-align: left;
+    border: 1px solid var(--gray-100);
+}
+
+.trend-window-grid .trend-window.available {
+    background: #f0fdf9;
+    border-color: #a7f3d0;
+}
+
+.trend-window-grid .trend-window.unavailable {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.trend-window-grid .trend-window small {
+    display: block;
+    font-size: .72rem;
+    color: var(--gray-500);
+    margin-top: 8px;
+}
+
+.trend-window-grid .trend-window ul {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    font-size: .78rem;
+    color: var(--gray-700);
+}
+
+.trend-window-grid .trend-window li + li { margin-top: 5px; }
+
+.model-evidence-card { margin-bottom: 24px; }
+.model-evidence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.model-evidence-grid > div { padding: 14px; background: var(--gray-50); border-radius: var(--border-radius-sm); }
+.model-evidence-grid span { display: block; font-size: .74rem; color: var(--gray-500); margin-bottom: 6px; }
+.model-evidence-grid strong { display: block; font-size: .84rem; line-height: 1.5; color: var(--gray-800); }
+
 .trend-window-grid strong {
     display: block;
     font-size: 1.2rem;
@@ -2956,6 +2994,7 @@ select.form-control {
     .trend-window-grid {
         grid-template-columns: 1fr;
     }
+    .model-evidence-grid { grid-template-columns: 1fr; }
     
     .pilot-metric-grid {
         grid-template-columns: 1fr;

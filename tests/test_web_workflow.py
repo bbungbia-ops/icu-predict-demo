@@ -101,8 +101,9 @@ class ClinicalWorkflowTests(unittest.TestCase):
         response = self.client.get("/predict/result/4")
         self.assertEqual(response.status_code, 200)
         self.assertIn("VÌ SAO CẦN XEM TRƯỚC?".encode(), response.data)
-        self.assertIn("Khung theo dõi 6–12–24 giờ".encode(), response.data)
+        self.assertIn("Đối chiếu bản ghi 6–12–24 giờ".encode(), response.data)
         self.assertIn("Chưa đủ chuỗi thời gian".encode(), response.data)
+        self.assertIn("Chưa xác thực lâm sàng".encode(), response.data)
 
     def test_pdf_is_a_research_summary_not_treatment_advice(self):
         response = self.client.get("/report/2")
@@ -284,6 +285,7 @@ class ClinicalWorkflowTests(unittest.TestCase):
             'patient_id': str(patient['id']), 'sofa': '8', 'map_value': '65',
             'pao2_fio2': '160', 'bilirubin': '1.2', 'creatinine': '1.1',
             'platelet': '180', 'gcs': '14', 'notes': 'Ca dùng thử',
+            'measurement_time': '2026-09-08T10:00',
         }
         for _ in range(3):
             response = customer.post('/predict', data=assessment_data)
