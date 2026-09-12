@@ -6,6 +6,7 @@ from routes.auth import login_required
 from models.database import get_db_connection
 from models.signal_presentation import describe_signal, explain_priority_reasons
 from models.trial_access import get_trial_status
+from models.model_governance import evidence_status
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -83,7 +84,13 @@ def index():
 @dashboard_bp.route('/about')
 @login_required
 def about():
-    return render_template('about.html')
+    predictor = current_app.config['PREDICTOR']
+    return render_template(
+        'about.html',
+        model_version=predictor.metadata['model_version'],
+        model_dataset=predictor.metadata.get('dataset', {}),
+        model_evidence=evidence_status(predictor.metadata),
+    )
 
 
 def _as_datetime(value):

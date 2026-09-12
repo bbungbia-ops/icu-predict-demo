@@ -97,6 +97,10 @@ def predict():
     }
     measurement_time_text = request.form.get('measurement_time', '').strip()
     try:
+        if request.form.get('unit_confirmed') != 'yes':
+            raise InputValidationError(
+                'Cần xác nhận đã kiểm tra đơn vị đo và thời điểm lấy mẫu trước khi tạo bản ghi.'
+            )
         measurement_time = datetime.fromisoformat(measurement_time_text)
         if measurement_time > datetime.now() + timedelta(minutes=5):
             raise ValueError('Thời điểm lấy mẫu không thể nằm trong tương lai.')
@@ -119,10 +123,10 @@ def predict():
 
     cursor = conn.execute(
         'INSERT INTO predictions (patient_id, organization_id, sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs, '
-        'risk_score, risk_level, measurement_time, predicted_by, notes, model_version, model_status, out_of_distribution) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'risk_score, risk_level, measurement_time, data_quality_confirmed, predicted_by, notes, model_version, model_status, out_of_distribution) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         (patient_id, session.get('organization_id'), sofa, map_value, pao2_fio2, bilirubin, creatinine, platelet, gcs,
-         result['risk_score'], result['risk_level'], measurement_time.isoformat(timespec='minutes'), session.get('user_id'), notes,
+         result['risk_score'], result['risk_level'], measurement_time.isoformat(timespec='minutes'), 1, session.get('user_id'), notes,
          result['model_version'], result['model_status'], int(bool(result['out_of_distribution'])))
     )
     prediction_id = cursor.lastrowid

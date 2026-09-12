@@ -36,6 +36,7 @@
                     <div><span>Tín hiệu mô hình</span><strong>{{ analysis.signal.label }}</strong><small>{{ analysis.signal.description }}</small></div>
                     <div><span>Phiên bản</span><strong>{{ analysis.model_version }}</strong><small>Có thể truy xuất nguồn gốc</small></div>
                     <div><span>Phạm vi dữ liệu</span><strong>{{ 'Cần xem lại' if analysis.out_of_distribution else 'Trong phạm vi demo' }}</strong><small>{{ 'Có giá trị ngoài dữ liệu huấn luyện' if analysis.out_of_distribution else 'Không chứng minh hiệu năng lâm sàng' }}</small></div>
+                    <div><span>Đối soát dữ liệu</span><strong>{{ 'Đã xác nhận đơn vị' if prediction.data_quality_confirmed else 'Bản ghi cũ chưa xác nhận' }}</strong><small>{{ 'Người nhập đã kiểm tra đơn vị và thời điểm lấy mẫu' if prediction.data_quality_confirmed else 'Cần bác sĩ kiểm tra lại nguồn và đơn vị đo' }}</small></div>
                 </div>
             </div>
         </section>

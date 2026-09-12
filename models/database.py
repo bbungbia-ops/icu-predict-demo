@@ -184,6 +184,7 @@ def init_db(
             risk_level TEXT NOT NULL,
             predicted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             measurement_time TIMESTAMP,
+            data_quality_confirmed INTEGER DEFAULT 0,
             predicted_by INTEGER,
             notes TEXT,
             model_version TEXT,
@@ -222,6 +223,7 @@ def init_db(
         'utility_score': 'INTEGER',
         'organization_id': 'INTEGER',
         'measurement_time': 'TIMESTAMP',
+        'data_quality_confirmed': 'INTEGER DEFAULT 0',
     }
     for column, definition in migration_columns.items():
         if column not in prediction_columns:

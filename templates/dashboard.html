@@ -7,7 +7,7 @@
     <div>
         <div class="eyebrow">KHÔNG GIAN ĐIỀU PHỐI ICU</div>
         <h1>Điều phối đánh giá</h1>
-        <div class="breadcrumb">Trả lời rõ: bệnh nhân nào cần xem trước, vì sao và đã được rà soát chưa.</div>
+        <div class="breadcrumb">Đúng bệnh nhân, đúng lý do, đúng thời điểm; bác sĩ quyết định.</div>
     </div>
     <a href="{{ url_for('predictions.predict_form') }}" class="btn btn-primary" id="btn-new-prediction">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
@@ -128,10 +128,13 @@
         <div><span class="workflow-step">03</span><strong>Đã được rà soát chưa?</strong><p>Trạng thái chờ/đã xác nhận cùng nhận định của bác sĩ được lưu trong nhật ký kiểm toán.</p></div>
     </section>
 
-    <div class="workflow-panel">
-        <div><span class="workflow-step">01</span><strong>Ghi nhận dữ liệu</strong><p>Nhập hoặc đồng bộ thông số có kiểm tra đơn vị.</p></div>
-        <div><span class="workflow-step">02</span><strong>Bác sĩ đánh giá</strong><p>Xem bối cảnh, mức độ tin cậy và ghi nhận nhận định.</p></div>
-        <div><span class="workflow-step">03</span><strong>Lưu nhật ký kiểm toán</strong><p>Quyết định thuộc về bác sĩ và được lưu để quản trị chất lượng.</p></div>
-    </div>
+    <section class="workflow-panel" aria-label="Quy trình điều phối khép kín">
+        <div><span class="workflow-step">01</span><strong>Nhập dữ liệu</strong><p>Ghi nhận thông số và thời điểm lấy mẫu.</p></div>
+        <div><span class="workflow-step">02</span><strong>Kiểm tra chất lượng</strong><p>Chặn dữ liệu thiếu/không hợp lý, gắn cờ khi cần.</p></div>
+        <div><span class="workflow-step">03</span><strong>Phân loại ưu tiên</strong><p>Sắp xếp bản ghi cần bác sĩ xem trước.</p></div>
+        <div><span class="workflow-step">04</span><strong>Giải thích nguyên nhân</strong><p>Cho biết các tín hiệu và trạng thái dữ liệu liên quan.</p></div>
+        <div><span class="workflow-step">05</span><strong>Bác sĩ xác nhận</strong><p>Bác sĩ đối chiếu bối cảnh và ghi nhận nhận định.</p></div>
+        <div><span class="workflow-step">06</span><strong>Lưu audit trail</strong><p>Dấu vết phục vụ quản trị chất lượng và Pilot.</p></div>
+    </section>
 </div>
 {% endblock %}

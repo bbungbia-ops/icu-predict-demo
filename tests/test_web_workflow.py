@@ -44,6 +44,7 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertIn("AI chỉ hỗ trợ nhận diện tín hiệu cần chú ý sớm".encode(), response.data)
         self.assertIn("Ưu tiên đánh giá".encode(), response.data)
         self.assertIn("Vì sao cần xem trước".encode(), response.data)
+        self.assertIn("Đúng bệnh nhân, đúng lý do, đúng thời điểm".encode(), response.data)
 
     def test_customer_layout_includes_mobile_navigation_and_table_hint(self):
         response = self.client.get("/dashboard")
@@ -90,12 +91,15 @@ class ClinicalWorkflowTests(unittest.TestCase):
         self.assertIn("01 ICU · 10–20 giường".encode(), response.data)
         self.assertIn("Thời gian tiết kiệm".encode(), response.data)
         self.assertIn("Cần thu thập baseline trước Pilot".encode(), response.data)
+        self.assertIn("Ba ca giả lập, một quy trình khép kín".encode(), response.data)
 
     def test_about_page_sets_safe_coordination_positioning(self):
         response = self.client.get("/about")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Không thay thế bác sĩ".encode(), response.data)
         self.assertIn("Đã được rà soát chưa?".encode(), response.data)
+        self.assertIn("CƠ SỞ MÔ HÌNH & GIỚI HẠN".encode(), response.data)
+        self.assertIn("Chưa xác thực lâm sàng".encode(), response.data)
 
     def test_result_explains_priority_and_marks_trend_as_not_ready(self):
         response = self.client.get("/predict/result/4")
@@ -286,6 +290,7 @@ class ClinicalWorkflowTests(unittest.TestCase):
             'pao2_fio2': '160', 'bilirubin': '1.2', 'creatinine': '1.1',
             'platelet': '180', 'gcs': '14', 'notes': 'Ca dùng thử',
             'measurement_time': '2026-09-08T10:00',
+            'unit_confirmed': 'yes',
         }
         for _ in range(3):
             response = customer.post('/predict', data=assessment_data)

@@ -46,9 +46,10 @@
                         <input type="datetime-local" id="measurement_time" name="measurement_time" class="form-control" value="{{ default_measurement_time }}" required>
                         <div class="indicator-hint">Dùng thời điểm các chỉ số được lấy, không phải thời điểm bấm lưu. Đây là điều kiện để so sánh chuỗi 6–12–24 giờ.</div>
                     </div>
+                    <label class="data-quality-confirmation" for="unit_confirmed"><input type="checkbox" id="unit_confirmed" name="unit_confirmed" value="yes" required><span><strong>Đã kiểm tra chất lượng dữ liệu</strong><small>Tôi đã đối chiếu đơn vị đo, thời điểm lấy mẫu và biết rằng giá trị thiếu/ngoài giới hạn sẽ không được dùng để tạo bản ghi.</small></span></label>
                 </div>
             </section>
-            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Kiểm tra đúng đơn vị xét nghiệm.</li><li>Đối chiếu thời điểm các chỉ số.</li><li>Ghi chú thuốc an thần/thở máy nếu có.</li></ul><div class="time-series-note"><strong>Chuỗi 6–12–24 giờ</strong><span>Sau khi có bản ghi cùng bệnh nhân và thời điểm lấy mẫu hợp lệ, hệ thống chỉ hiển thị chênh lệch số học giữa các mẫu; không suy diễn diễn biến lâm sàng.</span></div></div></aside>
+            <aside class="card intake-side"><div class="card-body"><div class="eyebrow">CHẤT LƯỢNG DỮ LIỆU</div><h3>Trước khi lưu</h3><ul class="guardrail-list"><li>Thiếu chỉ số: hệ thống dừng tạo bản ghi.</li><li>Giá trị không hợp lý: hệ thống yêu cầu kiểm tra lại đơn vị và dữ liệu nhập.</li><li>Ngoài phạm vi huấn luyện: bản ghi được gắn cờ để bác sĩ rà soát thủ công.</li></ul><div class="time-series-note"><strong>Chuỗi 6–12–24 giờ</strong><span>Sau khi có bản ghi cùng bệnh nhân và thời điểm lấy mẫu hợp lệ, hệ thống chỉ hiển thị chênh lệch số học giữa các mẫu; không suy diễn diễn biến lâm sàng.</span></div></div></aside>
         </div>
 
         <section class="card clinical-form-card">
