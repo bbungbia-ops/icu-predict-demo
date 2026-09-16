@@ -912,6 +912,21 @@ tbody tr:last-child td {
     color: #065f46;
 }
 
+.risk-score-value {
+    display: inline-block;
+    font-weight: 800;
+    color: #1e326d;
+    white-space: nowrap;
+}
+
+.risk-score-note {
+    display: block;
+    margin-top: 4px;
+    color: #657397;
+    font-size: 11px;
+    line-height: 1.25;
+}
+
 /* Data state indicators */
 .data-state {
     display: inline-flex;

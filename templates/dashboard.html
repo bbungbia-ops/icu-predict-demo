@@ -76,13 +76,13 @@
         </div>
         <div class="table-container">
             <table class="priority-table">
-                <thead><tr><th>Bệnh nhân</th><th>Khoa</th><th>Tín hiệu nghiên cứu</th><th>Vì sao cần xem trước</th><th>Chất lượng dữ liệu</th><th>Tạo lúc</th><th></th></tr></thead>
+                <thead><tr><th>Bệnh nhân</th><th>Khoa</th><th>Risk score (demo)</th><th>Vì sao cần xem trước</th><th>Chất lượng dữ liệu</th><th>Tạo lúc</th><th></th></tr></thead>
                 <tbody>
                     {% for item in review_queue %}
                     <tr>
                         <td><strong>{{ item.patient_code }}</strong><span class="table-subtitle">{{ item.name }}</span></td>
                         <td>{{ item.ward or 'Chưa phân khoa' }}</td>
-                        <td><span class="signal-badge signal-{{ item.signal.key }}">{{ item.signal.label }}</span></td>
+                        <td><span class="risk-score-value">{{ '%.1f'|format(item.risk_score) }}/100</span><span class="risk-score-note">Điểm hỗ trợ điều phối</span></td>
                         <td><ul class="priority-reason-list">{% for reason in item.priority_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></td>
                         <td>
                             {% if item.out_of_distribution %}
@@ -106,7 +106,7 @@
             <article class="priority-queue-item signal-{{ item.signal.key }}">
                 <div class="priority-queue-topline">
                     <div><strong>{{ item.patient_code }}</strong><span>{{ item.name }}</span></div>
-                    <span class="signal-badge signal-{{ item.signal.key }}">{{ item.signal.label }}</span>
+                    <span class="risk-score-value">{{ '%.1f'|format(item.risk_score) }}/100</span>
                 </div>
                 <div class="priority-queue-meta"><span>{{ item.ward or 'Chưa phân khoa' }}</span><span>{{ item.predicted_at }}</span></div>
                 <div class="priority-queue-reasons"><span>Vì sao cần xem trước</span><ul class="priority-reason-list">{% for reason in item.priority_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>

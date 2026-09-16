@@ -25,7 +25,7 @@ def index():
         (organization_id,),
     ).fetchone()[0]
     review_items = conn.execute('''
-        SELECT pr.id, p.name, p.patient_code, p.ward, pr.risk_level, pr.predicted_at,
+        SELECT pr.id, p.name, p.patient_code, p.ward, pr.risk_score, pr.risk_level, pr.predicted_at,
                pr.out_of_distribution, pr.model_version, pr.sofa, pr.map_value,
                pr.pao2_fio2, pr.bilirubin, pr.creatinine, pr.platelet, pr.gcs
         FROM predictions pr
@@ -38,7 +38,7 @@ def index():
         )
           AND pr.risk_level IN ('Cao', 'Trung bình', 'Trung binh')
           AND pr.acknowledged_at IS NULL
-        ORDER BY CASE pr.risk_level WHEN 'Cao' THEN 0 ELSE 1 END, pr.predicted_at DESC
+        ORDER BY pr.risk_score DESC, pr.predicted_at DESC
         LIMIT 10
     ''', (organization_id, organization_id)).fetchall()
     predictor = current_app.config['PREDICTOR']
