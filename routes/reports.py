@@ -134,7 +134,7 @@ def generate_report(prediction_id):
     pdf.set_text_color(255, 255, 255)
     pdf.set_font('Vietnamese', 'B', 10)
     col_widths = [60, 40, 45, 45]
-    headers = ['Chỉ số', 'Giá trị', 'Đơn vị', 'Ngưỡng hiển thị']
+    headers = ['Chỉ số', 'Giá trị', 'Đơn vị', 'Mức bình thường tham khảo']
     for i, h in enumerate(headers):
         pdf.cell(col_widths[i], 8, h, border=1, fill=True, align='C')
     pdf.ln()

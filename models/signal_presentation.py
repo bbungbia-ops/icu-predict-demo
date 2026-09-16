@@ -69,7 +69,7 @@ def explain_priority_reasons(
         else:
             reasons.append(
                 f"{feature['label']} {feature['status_text'].lower()} "
-                f"({feature['value']}{unit}); ngưỡng hiển thị demo là "
+                f"({feature['value']}{unit}); mức bình thường tham khảo là "
                 f"{feature['normal_min']}–{feature['normal_max']}."
             )
         if len(reasons) >= 3:
