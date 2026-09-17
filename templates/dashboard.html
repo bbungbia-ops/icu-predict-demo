@@ -76,7 +76,7 @@
         </div>
         <div class="table-container">
             <table class="priority-table">
-                <thead><tr><th>Bệnh nhân</th><th>Khoa</th><th>Risk score (demo)</th><th>Vì sao cần xem trước</th><th>Chất lượng dữ liệu</th><th>Tạo lúc</th><th></th></tr></thead>
+                <thead><tr><th>Bệnh nhân</th><th>Khoa</th><th>Risk score (demo)</th><th>Tín hiệu cần đối chiếu</th><th>Chất lượng dữ liệu</th><th>Tạo lúc</th><th></th></tr></thead>
                 <tbody>
                     {% for item in review_queue %}
                     <tr>
@@ -109,7 +109,7 @@
                     <span class="risk-score-value">{{ '%.1f'|format(item.risk_score) }}/100</span>
                 </div>
                 <div class="priority-queue-meta"><span>{{ item.ward or 'Chưa phân khoa' }}</span><span>{{ item.predicted_at }}</span></div>
-                <div class="priority-queue-reasons"><span>Vì sao cần xem trước</span><ul class="priority-reason-list">{% for reason in item.priority_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
+                <div class="priority-queue-reasons"><span>Tín hiệu cần đối chiếu</span><ul class="priority-reason-list">{% for reason in item.priority_reasons %}<li>{{ reason }}</li>{% endfor %}</ul></div>
                 <div class="priority-queue-footer">
                     {% if item.out_of_distribution %}<span class="data-state caution">Ngoài phạm vi huấn luyện</span>{% else %}<span class="data-state ready">Trong phạm vi dữ liệu demo</span>{% endif %}
                     <a href="{{ url_for('predictions.result', prediction_id=item.id) }}" class="btn btn-outline btn-sm">Mở đánh giá</a>

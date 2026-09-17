@@ -67,9 +67,9 @@ def explain_priority_reasons(
                 f"SOFA có điểm suy cơ quan ({feature['value']}{unit}); cần đối chiếu cùng toàn bộ bối cảnh."
             )
         else:
+            direction = "dưới" if feature.get("key") in ("map_value", "pao2_fio2", "platelet", "gcs") else "trên"
             reasons.append(
-                f"{feature['label']} {feature['status_text'].lower()} "
-                f"({feature['value']}{unit}); mức bình thường tham khảo là "
+                f"{feature['label']}: {feature['value']}{unit} → {direction} khoảng tham khảo "
                 f"{feature['normal_min']}–{feature['normal_max']}."
             )
         if len(reasons) >= 3:
