@@ -100,11 +100,11 @@ class ICUPredictor:
                 normalized = min(100, value / 24 * 100)
             elif key in ("map_value", "pao2_fio2", "platelet", "gcs"):
                 status = "danger" if value < normal_min else "normal"
-                status_text = "Cần đối chiếu" if status == "danger" else "Trong khoảng tham khảo"
+                status_text = "Cần đối chiếu lâm sàng" if status == "danger" else "Trong khoảng tham khảo"
                 normalized = min(100, max(0, value / normal_max * 100))
             else:
                 status = "danger" if value > normal_max else "normal"
-                status_text = "Cần đối chiếu" if status == "danger" else "Trong khoảng tham khảo"
+                status_text = "Cần đối chiếu lâm sàng" if status == "danger" else "Trong khoảng tham khảo"
                 normalized = min(100, max(0, value / (normal_max * 2) * 100))
 
             analysis.append(

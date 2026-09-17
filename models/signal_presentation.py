@@ -39,6 +39,15 @@ REVIEW_OUTCOME_LABELS = {
     "needs_follow_up": "Cần theo dõi thêm trước khi kết luận",
 }
 
+_CLINICAL_CONTEXT = {
+    "map_value": ("giảm", "cần đối chiếu huyết động và tưới máu"),
+    "pao2_fio2": ("giảm", "cần đối chiếu tình trạng oxy hóa máu"),
+    "bilirubin": ("tăng", "cần đối chiếu chức năng gan"),
+    "creatinine": ("tăng", "cần đối chiếu chức năng thận"),
+    "platelet": ("giảm", "cần đối chiếu tình trạng huyết học"),
+    "gcs": ("giảm", "cần đánh giá tri giác và thần kinh"),
+}
+
 
 def describe_signal(risk_level: str | None) -> dict[str, str]:
     """Trả nhãn điều phối phù hợp để hiển thị trên giao diện."""
@@ -67,10 +76,12 @@ def explain_priority_reasons(
                 f"SOFA có điểm suy cơ quan ({feature['value']}{unit}); cần đối chiếu cùng toàn bộ bối cảnh."
             )
         else:
-            direction = "dưới" if feature.get("key") in ("map_value", "pao2_fio2", "platelet", "gcs") else "trên"
+            direction, context = _CLINICAL_CONTEXT.get(
+                feature.get("key"), ("bất thường", "cần đối chiếu lâm sàng")
+            )
             reasons.append(
-                f"{feature['label']}: {feature['value']}{unit} → {direction} khoảng tham khảo "
-                f"{feature['normal_min']}–{feature['normal_max']}."
+                f"{feature['label']} {feature['value']}{unit}: {direction} so với khoảng tham chiếu "
+                f"{feature['normal_min']}–{feature['normal_max']}; {context}."
             )
         if len(reasons) >= 3:
             break
